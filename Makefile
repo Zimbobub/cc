@@ -33,9 +33,13 @@ clean:
 	rm -rf $(BUILD_DIR) $(BIN)
 
 
+
 test: all
+	find tests/ -name *.c -exec make run_test TEST="{}" \;
+
+run_test: all
 	mkdir -p $(BUILD_DIR)/tests
 	$(BIN) -i $(TEST) -o $(BUILD_DIR)/$(TEST).asm
-	as $(BUILD_DIR)/$(TEST).asm -o $(BUILD_DIR)/$(TEST).o
-	ld $(BUILD_DIR)/$(TEST).o
-	$(BUILD_DIR)/$(TEST)
+# 	as $(BUILD_DIR)/$(TEST).asm -o $(BUILD_DIR)/$(TEST).o
+# 	ld $(BUILD_DIR)/$(TEST).o
+# 	$(BUILD_DIR)/$(TEST)
