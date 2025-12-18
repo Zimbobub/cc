@@ -8,5 +8,5 @@ mkdir -p build/tests
 for src_file in `ls -d tests/*`
 do
     echo $src_file
-    lexer/build/cc -i $src_file -o build/$src_file.tokens
+    cat $src_file | lexer/build/cc > build/$src_file.tokens
 done
