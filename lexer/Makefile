@@ -3,7 +3,7 @@ CC := gcc
 CFLAGS := -Wall -Wextra -g
 
 # Directories
-SRC_DIR := src
+SRC_DIR := .
 BUILD_DIR := build
 BIN := ${BUILD_DIR}/cc
 
