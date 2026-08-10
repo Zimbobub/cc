@@ -1,5 +1,7 @@
 #include "preprocessor.h"
 
+TokenType get_single_char_token_type(char c);
+TokenType get_double_char_token_type(char c1, char c2);
 
 void run_preprocessor(const char *file_name, Token *tokens, size_t *num_tokens) {
     FILE *fp = fopen(file_name, "r");
@@ -78,21 +80,51 @@ void run_preprocessor(const char *file_name, Token *tokens, size_t *num_tokens) 
 
         // once token_type_bitset gets to 0, see which type in the previous loop had its bit set last
         if (token_type_bitset == 0) {
-            if (prev_token_type_bitset == IS_IDENTIFIER) {
-                // TODO
-            } else if (prev_token_type_bitset == IS_NUMBER) {
-                // TODO
-            } else if (prev_token_type_bitset == IS_SINGLE_CHAR) {
-                // TODO
-            } else if (prev_token_type_bitset == IS_DOUBLE_CHAR) {
-                // TODO
-            } else {
-                printf("Unknown token type at ");
+            Token token = {0};
+            strncpy(token.src, current_token, current_token_size-1); // dont copy last char
+            token.line_num = line;
+            token.col_num = col;
+
+            if (prev_token_type_bitset == IS_IDENTIFIER) token.type = Identifier;
+            else if (prev_token_type_bitset == IS_NUMBER) token.type = Number;
+            else if (prev_token_type_bitset == IS_SINGLE_CHAR) token.type = get_single_char_token_type(current_token[0]);
+            else if (prev_token_type_bitset == IS_DOUBLE_CHAR) token.type = get_double_char_token_type(current_token[0], current_token[1]);
+            else {
+                printf("Unknown token type %x at %d:%d\n", prev_token_type_bitset, line, col);
                 fclose(fp);
                 exit(EXIT_FAILURE);
             }
+
+            tokens[*num_tokens] = token;
+            *num_tokens++;
+
+            // reset current_token
+            memset(current_token, 0, current_token_size);
+            current_token_size = 1;
+            current_token[0] = c;
+
+            // reset bitsets
+            token_type_bitset = 0b00001111;
+            prev_token_type_bitset = 0b00001111;
         }
     }
 
     fclose(fp);
+}
+
+
+TokenType get_single_char_token_type(char c) {
+    if (c == ';') return Semicolon;
+    else if (c == '.') return Period;
+    else if (c == ',') return Comma;
+    else if (c == '(') return LParen;
+    else if (c == ')') return RParen;
+    else if (c == '[') return LBracket;
+    else if (c == ']') return RBracket;
+    else if (c == '{') return LBrace;
+    else if (c == '}') return RBrace;
+}
+
+TokenType get_double_char_token_type(char c1, char c2) {
+    // TODO
 }

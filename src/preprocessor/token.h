@@ -3,22 +3,22 @@
 
 #include <stddef.h>
 
-enum TokenType {
+typedef enum {
     Identifier,
     Number,
     StringLiteral,
+
+    Semicolon,
+    Period,
+    Comma,
 
     LParen,
     RParen,
     LBracket,
     RBracket,
     LBrace,
-    RBrace,
-
-    Semicolon,
-    Period,
-    Comma
-};
+    RBrace
+} TokenType;
 
 typedef struct {
     TokenType type;
