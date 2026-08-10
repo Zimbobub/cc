@@ -3,15 +3,11 @@
 
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <ctype.h>
 
 #include "token.h"
 
-typedef struct {
-    size_t src_buf_size;
-    char *src_buf;
-
-    size_t token_buf_size;
-    Token *token_buf;
-} Preprocessor;
+void run_preprocessor(const char* file_name, Token* tokens, size_t* num_tokens);
 
 #endif
