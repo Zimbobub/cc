@@ -7,6 +7,7 @@
 typedef enum {
     Unknown,
     
+    Keyword,
     Identifier,
     Number,
     StringLiteral,

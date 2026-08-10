@@ -192,6 +192,7 @@ bool is_delimiter(char c) {
 }
 
 bool is_identifier(const char* str, size_t len) {
+    if (len == 0) return false;
     for (int i = 0; i < len; i++) {
         if (is_delimiter(str[i])) return false;
     }
@@ -217,10 +218,51 @@ bool is_keyword(const char* str, size_t len) {
 }
 
 bool is_int(const char *str, size_t len) {
+    if (len == 0) return false;
     for (int i = 0; i < len; i++) {
         if (!isdigit(str[i])) return false;
     }
     return true;
+}
+
+void add_token(Preprocessor *this,  TokenType type) {
+    // make token
+    Token token = {0};
+    token.line_num = this->line;
+    token.col_num = this->col;
+    token.type = type;
+    token.src = malloc(this->input_buf_size+1);
+    if (token.src == NULL) {
+        printf("Malloc failed\n");
+        exit(EXIT_FAILURE);
+    }
+    strcpy(token.src, this->input_buf);
+    clear_buffer(this);
+
+    // add to tokens
+    if (this->n_tokens>= this->max_tokens-1) {
+        this->max_tokens *= 2;
+        this->tokens = realloc(this->tokens, this->max_tokens);
+        if (this->tokens == NULL) {
+            printf("Realloc failed.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    this->tokens[this->n_tokens] = token;
+    this->n_tokens++;
+}
+
+void add_char(Preprocessor *this, char c) {
+    if (this->input_buf_size >= this->input_buf_max_size-1) {
+        this->input_buf_max_size *= 2;
+        this->input_buf = realloc(this->input_buf, this->input_buf_max_size);
+        if (this->input_buf == NULL) {
+            printf("Realloc failed.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    this->input_buf[this->input_buf_size] = c;
+    this->input_buf_size++;
 }
 
 void consume_chars(Preprocessor *this, size_t num_chars) {
@@ -233,6 +275,11 @@ void consume_chars(Preprocessor *this, size_t num_chars) {
     // strcpy for overlapping ptrs is undefined behaviour, so use an intermediary
     strcpy(temp_str, this->input_buf + num_chars);
     strcpy(this->input_buf, temp_str);
+}
+
+void clear_buffer(Preprocessor *this) {
+    memset(this->input_buf, 0, this->input_buf_max_size);
+    this->input_buf_size = 0;
 }
 
 Preprocessor* preprocessor_init(const char* file_name) {
@@ -274,31 +321,47 @@ void preprocessor_run(Preprocessor *this) {
     // left = input_buf[0]
     // right = input_buf[len-1]
 
-    char c;
+    int c;
     while (c != EOF) {
         // if within a token, add next char to buf
         if (!is_delimiter(this->input_buf[this->input_buf_size-1])) {
             c = fgetc(this->fp);
-            if (this->input_buf_size >= this->input_buf_max_size-1) {
-                this->input_buf_max_size *= 2;
-                this->input_buf = realloc(this->input_buf, this->input_buf_max_size);
-                if (this->input_buf == NULL) {
-                    printf("Realloc failed.\n");
-                    exit(EXIT_FAILURE);
-                }
-            }
-            this->input_buf[this->input_buf_size] = c;
-            this->input_buf_size++;
-        } else {
-            // single char token
-            if (this->input_buf_size == 0) {
-                if (is_operator(this->input_buf[this->input_buf_size-1])) {
-                    printf("operator %c\n", this->input_buf[this->input_buf_size-1]);
-                }
+            add_char(this, c);
+        } 
 
-                // consume 1 char
-                consume_chars(this, 1);
-            } else if (this->input_buf_size > 0)
+        // single char token
+        if (is_delimiter(this->input_buf[this->input_buf_size-1]) && this->input_buf_size == 1) {
+            // if (is_operator(this->input_buf[this->input_buf_size-1])) {
+            //     printf("operator %c\n", this->input_buf[this->input_buf_size-1]);
+                
+            // }
+            printf("token '%c'\n", this->input_buf[this->input_buf_size-1]);
+            add_token(this, get_single_char_token_type(this->input_buf[0]));
+
+            // consume 1 char, and add the next
+            // consume_chars(this, 1);
+            c = fgetc(this->fp);
+            add_char(this, c);
+        } else if (is_delimiter(this->input_buf[this->input_buf_size-1]) && this->input_buf_size != 0/* EOF || (this->input_buf_size == 0)*/) {
+            // substr = input_buf
+
+            if (is_keyword(this->input_buf, this->input_buf_size)) {                
+                printf("keyword '%s'\n", this->input_buf);
+                add_token(this, Keyword);
+            } else if (is_int(this->input_buf, this->input_buf_size)) {
+                printf("number '%s'\n", this->input_buf);
+                add_token(this, Number);
+            } else if (is_identifier(this->input_buf, this->input_buf_size)) {
+                printf("identifier '%s'\n", this->input_buf);
+                add_token(this, Identifier);
+            } else {
+                printf("Unknown token: '%s'\n", this->input_buf);
+            }
+
+            clear_buffer(this);
+
+            c = fgetc(this->fp);
+            add_char(this, c);
         }
     }
 }
