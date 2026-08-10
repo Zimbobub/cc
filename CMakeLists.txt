@@ -15,7 +15,7 @@ include_directories(
 set(SOURCES
     src/main.c
     src/args.c
-    src/tok/tok.c
+    src/preprocessor/preprocessor.c
 )
 
 add_executable(mycc ${SOURCES})

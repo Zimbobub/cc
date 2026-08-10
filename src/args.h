@@ -1,4 +1,6 @@
-#pragma once
+#ifndef ARGS_H
+#define ARGS_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -11,3 +13,5 @@ typedef struct {
 
 
 Args read_args(int argc, char* argv[]);
+
+#endif
