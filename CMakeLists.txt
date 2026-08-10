@@ -16,6 +16,7 @@ set(SOURCES
     src/main.c
     src/args.c
     src/preprocessor/preprocessor.c
+    src/preprocessor/token.c
 )
 
 add_executable(mycc ${SOURCES})

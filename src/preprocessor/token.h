@@ -2,8 +2,11 @@
 #define TOKEN_H
 
 #include <stddef.h>
+#include <stdio.h>
 
 typedef enum {
+    Unknown,
+    
     Identifier,
     Number,
     StringLiteral,
@@ -27,5 +30,6 @@ typedef struct {
     size_t col_num;
 } Token;
 
+void print_token(Token *token);
 
 #endif
