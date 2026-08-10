@@ -1,7 +1,5 @@
 #include "args.h"
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+
 
 extern char* optarg;
 extern int optopt;

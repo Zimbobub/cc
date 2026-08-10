@@ -1,12 +1,10 @@
-cd lexer
-make
-cd ..
-
-rm -rf build/tests
 mkdir -p build/tests
+cd build
+cmake -B . -S ../ && cmake --build .
 
-for src_file in `ls -d tests/*`
+for src_file in `ls ../tests`
 do
-    echo $src_file
-    cat $src_file | lexer/build/cc > build/$src_file.tokens
+    echo TESTING $src_file
+    cat ../tests/$src_file | ./mycc | tee ./tests/$src_file.tokens
+    # compare program outputs when more steps added
 done
