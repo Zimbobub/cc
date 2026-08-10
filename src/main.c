@@ -23,10 +23,11 @@ int main(int argc, char* argv[]) {
     Token *tokens = NULL;
     size_t num_tokens = 0;
 
-    run_preprocessor(file, tokens, &num_tokens);
+    Preprocessor *preprocessor = preprocessor_init(file);
+    preprocessor_run(preprocessor);
 
     for (int i = 0; i < num_tokens; i++) {
-        print_token(&tokens[i]);
+        print_token(&preprocessor->tokens[i]);
     }
 
     // size_t bufferLen = 1024;
