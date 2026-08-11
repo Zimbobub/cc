@@ -4,6 +4,7 @@ void print_token(Token *token) {
     static const char *token_types[] = {
         "Unknown",
 
+        "Keyword",
         "Identifier",
         "Number",
         "StringLiteral",
