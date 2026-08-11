@@ -29,8 +29,8 @@ typedef struct {
     Token *tokens;
 } Preprocessor;
 
-void old_run_preprocessor(const char* file_name, Token* tokens, size_t* num_tokens);
 Preprocessor* preprocessor_init(const char* file_name);
+void preprocessor_destruct(Preprocessor *this);
 void preprocessor_run(Preprocessor *this);
 
 #endif

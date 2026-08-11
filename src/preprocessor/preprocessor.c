@@ -27,7 +27,7 @@ bool is_delimiter(char c) {
 
 bool is_identifier(const char* str, size_t len) {
     if (len == 0) return false;
-    for (int i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
         if (!isalnum(str[i]) && str[i] != '_') return false;
     }
     return (!isdigit(str[0]));
@@ -45,8 +45,9 @@ bool is_keyword(const char* str, size_t len) {
         "unsigned", "void",     "volatile", "while" 
     };
 
-    for (int i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
-        if (strcmp(str, keywords[i]) == 0) return true;
+    for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
+        size_t keyword_len = strlen(keywords[i]);
+        if (len == keyword_len && memcmp(str, keywords[i], len) == 0) return true;
     }
     return false;
 }
@@ -83,9 +84,9 @@ void consume_token(Preprocessor *this,  TokenType type) {
     clear_buffer(this);
 
     // add to tokens
-    if (this->n_tokens>= this->max_tokens-1) {
+    if (this->n_tokens >= this->max_tokens-1) {
         this->max_tokens *= 2;
-        this->tokens = realloc(this->tokens, this->max_tokens);
+        this->tokens = realloc(this->tokens, sizeof(Token) * this->max_tokens);
         if (this->tokens == NULL) {
             printf("Realloc failed.\n");
             exit(EXIT_FAILURE);
@@ -108,6 +109,7 @@ void add_char(Preprocessor *this, char c) {
     }
     this->input_buf[this->input_buf_size] = c;
     this->input_buf_size++;
+    this->input_buf[this->input_buf_size] = '\0';
 }
 
 void consume_chars(Preprocessor *this, size_t num_chars) {
@@ -142,11 +144,11 @@ Preprocessor* preprocessor_init(const char* file_name) {
     this->input_buf_max_size = 100;
     this->input_buf_size = 0;
     this->input_buf = malloc(this->input_buf_max_size);
-    this->input_buf[0] = '\0';
+    memset(this->input_buf, 0, this->input_buf_max_size);
 
     this->max_tokens = 100;
     this->n_tokens = 0;
-    this->tokens = malloc(this->max_tokens);
+    this->tokens = malloc(sizeof(Token) * this->max_tokens);
 
     if (this->input_buf == NULL || this->tokens == NULL) {
         printf("Malloc failed");
@@ -157,19 +159,32 @@ Preprocessor* preprocessor_init(const char* file_name) {
 }
 
 
+void preprocessor_destruct(Preprocessor *this) {
+    fclose(this->fp);
+    free(this->input_buf);
+
+    for (int i = 0; i < this->n_tokens; i++) {
+        free(this->tokens[i].src);
+    }
+    free(this->tokens);
+
+    free(this);
+}
+
+
 void preprocessor_run(Preprocessor *this) {
-    // left = input_buf[0]
-    // right = input_buf[len-1]
-
-    // LOAD BEARING PRINTF?
-    printf("%d\n",  is_delimiter('0'));
-
-    int c;
-    while (c != EOF) {
+    int c = 0;
+    bool c_was_EOF = false;
+    while (!c_was_EOF) {
         c = fgetc(this->fp);
-        if (c == EOF) break;
+        // allow flushing of any text still in the buffer when we reach end of file by preternding EOF is whitespace
+        // we then exit at the end of this loop
+        if (c == EOF) {
+            c_was_EOF = true;
+            c = ' ';
+        };
 
-        printf("%s:%ld:%ld '%c' 0x%x len:%ld '%s'\n", this->file_name, this->line, this->col, c, c, this->input_buf_size, this->input_buf);
+        // printf("%s:%ld:%ld '%c' 0x%x len:%ld '%s'\n", this->file_name, this->line, this->col, c, c, this->input_buf_size, this->input_buf);
 
         this->col++;
         if (c == '\n') {
@@ -179,17 +194,13 @@ void preprocessor_run(Preprocessor *this) {
 
         if (isspace(c) && this->input_buf_size == 0) continue;
 
-        bool upcoming_char_is_delimiter = is_delimiter(c);
-
         // if within a token, add next char to buf
-        if (this->input_buf_size == 0 || !upcoming_char_is_delimiter) {
+        if (this->input_buf_size == 0 || ! is_delimiter(c)) {
             add_char(this, c);
         } else if (this->input_buf_size == 1 && is_delimiter(this->input_buf[0])) {
-            // single char token
-
-            // try make 2 char special
-            TokenType single_token = get_single_char_token_type(this->input_buf[0]);
+            // try make 1 or 2 char token
             TokenType double_token = get_double_char_token_type(this->input_buf[0], c);
+            TokenType single_token = get_single_char_token_type(this->input_buf[0]);
             if (double_token != Unknown) {
                 // 2 char
                 printf("token '%c%c'\n", this->input_buf[0], c);
@@ -205,9 +216,7 @@ void preprocessor_run(Preprocessor *this) {
                 exit(EXIT_FAILURE);
             }
 
-        } else {// (this->input_buf_size > 1/* EOF || (this->input_buf_size == 0)*/) {
-            // substr = input_buf
-
+        } else {
             if (is_keyword(this->input_buf, this->input_buf_size)) {                
                 printf("keyword '%s'\n", this->input_buf);
                 consume_token(this, Keyword);
@@ -223,10 +232,7 @@ void preprocessor_run(Preprocessor *this) {
             }
 
             if (!isspace(c)) add_char(this, c);
-        }/* else {
-            printf("huh?\n");
-            exit(EXIT_FAILURE);
-        }*/
+        }
     }
 
     printf("Finished preprocessing with remaining '%s'\n", this->input_buf);

@@ -30,6 +30,8 @@ int main(int argc, char* argv[]) {
         print_token(&preprocessor->tokens[i]);
     }
 
+    preprocessor_destruct(preprocessor);
+
     // size_t bufferLen = 1024;
     // size_t bufferEndIndex = 0;
     // char* tokenBuffer = malloc(bufferLen);
