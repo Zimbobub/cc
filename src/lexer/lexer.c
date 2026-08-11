@@ -1,4 +1,4 @@
-#include "preprocessor.h"
+#include "lexer.h"
 
 TokenType get_single_char_token_type(char c) {
     if (c == ';') return Semicolon;
@@ -61,15 +61,15 @@ bool is_int(const char *str, size_t len) {
 }
 
 //
-// PREPROCESSOR HELPER METHODS
+// LEXER HELPER METHODS
 //
 
-void clear_buffer(Preprocessor *this) {
+void clear_buffer(Lexer *this) {
     memset(this->input_buf, 0, this->input_buf_max_size);
     this->input_buf_size = 0;
 }
 
-void consume_token(Preprocessor *this,  TokenType type) {
+void consume_token(Lexer *this,  TokenType type) {
     // make token
     Token token = {0};
     token.line_num = this->line;
@@ -96,7 +96,7 @@ void consume_token(Preprocessor *this,  TokenType type) {
     this->n_tokens++;
 }
 
-void add_char(Preprocessor *this, char c) {
+void add_char(Lexer *this, char c) {
     // if (isspace(c)) return;
 
     if (this->input_buf_size >= this->input_buf_max_size-1) {
@@ -112,7 +112,7 @@ void add_char(Preprocessor *this, char c) {
     this->input_buf[this->input_buf_size] = '\0';
 }
 
-void consume_chars(Preprocessor *this, size_t num_chars) {
+void consume_chars(Lexer *this, size_t num_chars) {
     char *temp_str = malloc(this->input_buf_max_size);
     if (temp_str == NULL) {
         printf("Malloc failed\n");
@@ -124,8 +124,8 @@ void consume_chars(Preprocessor *this, size_t num_chars) {
     strcpy(this->input_buf, temp_str);
 }
 
-Preprocessor* preprocessor_init(const char* file_name) {
-    Preprocessor *this = malloc(sizeof(Preprocessor));
+Lexer* lexer_init(const char* file_name) {
+    Lexer *this = malloc(sizeof(Lexer));
     if (this == NULL) {
         printf("Malloc failed\n");
         exit(EXIT_FAILURE);
@@ -159,7 +159,7 @@ Preprocessor* preprocessor_init(const char* file_name) {
 }
 
 
-void preprocessor_destruct(Preprocessor *this) {
+void lexer_destruct(Lexer *this) {
     fclose(this->fp);
     free(this->input_buf);
 
@@ -172,7 +172,7 @@ void preprocessor_destruct(Preprocessor *this) {
 }
 
 
-void preprocessor_run(Preprocessor *this) {
+void lexer_run(Lexer *this) {
     int c = 0;
     bool c_was_EOF = false;
     while (!c_was_EOF) {

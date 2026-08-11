@@ -10,4 +10,4 @@ do
 done
 
 #check for leaks with 
-# gcc -g -O0 -fsanitize=address,undefined -Wall -Wextra ../src/main.c ../src/args.c ../src/preprocessor/token.c ../src/preprocessor/preprocessor.c -o ./mycc
+# gcc -g -O0 -fsanitize=address,undefined -Wall -Wextra ../src/main.c ../src/args.c ../src/lexer/token.c ../src/lexer/lexer.c -o ./mycc

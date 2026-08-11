@@ -1,5 +1,5 @@
-#ifndef PREPROCESSOR_H
-#define PREPROCESSOR_H
+#ifndef LEXER_H
+#define LEXER_H
 
 #include <stdlib.h>
 #include <stddef.h>
@@ -27,10 +27,10 @@ typedef struct {
     size_t max_tokens;
     size_t n_tokens;
     Token *tokens;
-} Preprocessor;
+} Lexer;
 
-Preprocessor* preprocessor_init(const char* file_name);
-void preprocessor_destruct(Preprocessor *this);
-void preprocessor_run(Preprocessor *this);
+Lexer* lexer_init(const char* file_name);
+void lexer_destruct(Lexer *this);
+void lexer_run(Lexer *this);
 
 #endif

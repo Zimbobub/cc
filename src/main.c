@@ -3,32 +3,49 @@
 #include <string.h>
 
 #include "args.h"
-#include "preprocessor/preprocessor.h"
-#include "preprocessor/token.h"
+#include "lexer/lexer.h"
+#include "lexer/token.h"
 
 
 
 
-void parse_token(char* tokenBuffer, size_t bufferEndIndex, size_t bufferLen) {
-    if (bufferEndIndex == 0) return;
-    printf("%s\n", tokenBuffer);
-}
+typedef enum {
+    STAGE_LEXER,
+    STAGE_PARSER,
+    STAGE_CODEGEN,
+    STAGE_CODE_EMISSION
+} Stage;
 
 
 
 int main(int argc, char* argv[]) {
-    // printf("\033[1m\033[32m START_LEXER \033[0m \n");
-
-    char *file = "../tests/basic.c";
-
-    Preprocessor *preprocessor = preprocessor_init(file);
-    preprocessor_run(preprocessor);
-
-    for (int i = 0; i < preprocessor->n_tokens; i++) {
-        print_token(&preprocessor->tokens[i]);
+    // if user enters -h, or uses incorrect args
+    if ((argc >= 2 && strcmp(argv[1], "-h") == 0) || (argc != 3 && argc != 4)) {
+        printf("Usage: cc <filename.c> <output.s> <stage>\nStage: 'lex' | 'parse' | 'codegen'\nIf stage not given, defaults to code emission\n");
+        return EXIT_FAILURE;
     }
 
-    preprocessor_destruct(preprocessor);
+    char *input_file = argv[1];
+    char *output_file = argv[2];
+    Stage stage = STAGE_CODE_EMISSION;
+    if (argc == 4) {
+        if (strcmp(argv[3], "lex") == 0) stage = STAGE_LEXER;
+        else if (strcmp(argv[3], "parse") == 0) stage = STAGE_PARSER;
+        else if (strcmp(argv[3], "codegen") == 0) stage = STAGE_CODEGEN;
+        else {
+            printf("Usage: cc <filename.c> <output.s> <stage>\nStage: 'lex' | 'parse' | 'codegen'\nIf stage not given, defaults to code emission\n");
+            return EXIT_FAILURE;
+        }
+    }
+
+    Lexer *lexer = lexer_init(input_file);
+    lexer_run(lexer);
+
+    for (int i = 0; i < lexer->n_tokens; i++) {
+        print_token(&lexer->tokens[i]);
+    }
+
+    lexer_destruct(lexer);
 
     return 0;
 }
