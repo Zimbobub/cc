@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "args.h"
 #include "lexer/lexer.h"
 #include "lexer/token.h"
 

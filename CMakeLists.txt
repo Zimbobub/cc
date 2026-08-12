@@ -14,7 +14,6 @@ include_directories(
 
 set(SOURCES
     src/main.c
-    src/args.c
     src/lexer/lexer.c
     src/lexer/token.c
 )
