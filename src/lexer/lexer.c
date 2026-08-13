@@ -194,10 +194,7 @@ void lexer_run(Lexer *this) {
 
         if (isspace(c) && this->input_buf_size == 0) continue;
 
-        // if within a token, add next char to buf
-        if (this->input_buf_size == 0 || ! is_delimiter(c)) {
-            add_char(this, c);
-        } else if (this->input_buf_size == 1 && is_delimiter(this->input_buf[0])) {
+        if (this->input_buf_size == 1 && is_delimiter(this->input_buf[0])) {
             // try make 1 or 2 char token
             TokenType double_token = get_double_char_token_type(this->input_buf[0], c);
             TokenType single_token = get_single_char_token_type(this->input_buf[0]);
@@ -216,6 +213,9 @@ void lexer_run(Lexer *this) {
                 exit(EXIT_FAILURE);
             }
 
+        } else if (this->input_buf_size == 0 || !is_delimiter(c)) {
+            // if within a token, add next char to buf
+            add_char(this, c);
         } else {
             if (is_keyword(this->input_buf, this->input_buf_size)) {                
                 printf("keyword '%s'\n", this->input_buf);
@@ -227,8 +227,10 @@ void lexer_run(Lexer *this) {
                 printf("identifier '%s'\n", this->input_buf);
                 consume_token(this, Identifier);
             } else {
-                printf("Unknown token: '%s'\n", this->input_buf);
-                consume_token(this, Unknown);
+                // printf("Unknown token: '%s'\n", this->input_buf);
+                printf("Unknown token: %s:%ld:%ld '%s'\n", this->file_name, this->line, this->col, this->input_buf);
+                exit(EXIT_FAILURE);
+                // consume_token(this, Unknown);
             }
 
             if (!isspace(c)) add_char(this, c);
