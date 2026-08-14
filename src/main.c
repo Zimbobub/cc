@@ -6,7 +6,7 @@
 #include "lexer/lexer.h"
 #include "lexer/token.h"
 #include "parser/parser.h"
-#include "codegen/asm.h"
+#include "codegen/codegen.h"
 
 
 typedef enum {
@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
 
     // parser
     CProgram ast = parse_program(tokens);
-    print_program(&ast);
+    print_c_program(&ast);
 
     if (stage == STAGE_PARSER) {
         tokenbuf_destruct(&tokens);
@@ -139,6 +139,7 @@ int main(int argc, char* argv[]) {
 
     // asm gen
     AsmProgram asm_ast = transform_program(ast);
+    print_asm_program(&asm_ast);
 
     if (stage == STAGE_CODEGEN) {
         tokenbuf_destruct(&tokens);

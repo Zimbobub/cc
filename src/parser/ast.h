@@ -70,10 +70,10 @@ typedef struct {
 
 
 
-void print_expr(CExpression* expr, int depth);
-void print_statement(CStatement* stmnt, int depth);
-void print_function_definition(CFunctionDefinition* func, int depth);
-void print_program(CProgram* program);
+void print_c_expr(CExpression* expr, int depth);
+void print_c_statement(CStatement* stmnt, int depth);
+void print_c_function_definition(CFunctionDefinition* func, int depth);
+void print_c_program(CProgram* program);
 
 
 #endif

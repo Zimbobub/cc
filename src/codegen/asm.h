@@ -3,7 +3,6 @@
 
 #include <stddef.h>
 
-#include "../parser/parser.h"
 #include "../parser/ast.h"
 
 // OPERAND
@@ -57,6 +56,10 @@ typedef struct {
 } AsmProgram;
 
 
-AsmProgram transform_program(CProgram ast);
+void print_asm_operand(AsmOperand* op);
+void print_asm_instruction(AsmInstruction* instr, int depth);
+void print_asm_function_definition(AsmFunctionDefinition* func, int depth);
+void print_asm_program(AsmProgram* program);
+
 
 #endif
