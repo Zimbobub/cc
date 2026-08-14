@@ -27,6 +27,11 @@ typedef struct {
     size_t max_tokens;
     size_t n_tokens;
     Token *tokens;
+
+    // error
+    bool err;
+    char *err_msg; // undefined unless err=true
+    size_t err_len;
 } Lexer;
 
 Lexer* lexer_init(const char* file_name);

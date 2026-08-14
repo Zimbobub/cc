@@ -155,6 +155,8 @@ Lexer* lexer_init(const char* file_name) {
         exit(EXIT_FAILURE);
     }
 
+    this->err = false;
+
     return this;
 }
 
@@ -167,6 +169,10 @@ void lexer_destruct(Lexer *this) {
         free(this->tokens[i].src);
     }
     free(this->tokens);
+
+    if (this->err) {
+        free(this->err_msg);
+    }
 
     free(this);
 }
@@ -209,8 +215,10 @@ void lexer_run(Lexer *this) {
                 consume_token(this, single_token);
                 if (!isspace(c)) add_char(this, c);
             } else {
-                printf("Unknown single char token type: %s:%ld:%ld '%c' 0x%x\n", this->file_name, this->line, this->col, this->input_buf[0], this->input_buf[0]);
-                exit(EXIT_FAILURE);
+                this->err_len = asprintf(this->err_msg, "Unknown single char token type: %s:%ld:%ld '%c' 0x%x\n", this->file_name, this->line, this->col, this->input_buf[0], this->input_buf[0]);
+                this->err = true;
+                return;
+                // exit(EXIT_FAILURE);
             }
 
         } else if (this->input_buf_size == 0 || !is_delimiter(c)) {
@@ -228,8 +236,10 @@ void lexer_run(Lexer *this) {
                 consume_token(this, Identifier);
             } else {
                 // printf("Unknown token: '%s'\n", this->input_buf);
-                printf("Unknown token: %s:%ld:%ld '%s'\n", this->file_name, this->line, this->col, this->input_buf);
-                exit(EXIT_FAILURE);
+                this->err_len = asprintf(this->err_msg, "Unknown token: %s:%ld:%ld '%s'\n", this->file_name, this->line, this->col, this->input_buf);
+                this->err = true;
+                return;
+                //exit(EXIT_FAILURE);
                 // consume_token(this, Unknown);
             }
 

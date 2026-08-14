@@ -87,17 +87,22 @@ int main(int argc, char* argv[]) {
     Lexer *lexer = lexer_init(preprocessed_file);
     lexer_run(lexer);
 
-    for (int i = 0; i < lexer->n_tokens; i++) {
-        print_token(&lexer->tokens[i]);
+    if (lexer->err) {
+        printf("LEXER ERROR: %s\n", lexer->err_msg);
+    } else {
+        for (int i = 0; i < lexer->n_tokens; i++) {
+            print_token(&lexer->tokens[i]);
+        }
     }
 
-    if (stage == STAGE_LEXER) {
+    if (stage == STAGE_LEXER || lexer->err) {
+        bool err = lexer->err; // prevent use after free
         lexer_destruct(lexer);
         free(preprocessed_file);
         free(assembly_file);
         free(object_file);
         free(exec_file);
-        return EXIT_SUCCESS;
+        return (err ? EXIT_FAILURE : EXIT_SUCCESS);
     }
 
     // parser
