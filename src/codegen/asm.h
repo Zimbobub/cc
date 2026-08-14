@@ -38,6 +38,12 @@ typedef struct {
 } AsmInstruction;
 
 
+typedef struct {
+    AsmInstruction* instructions;
+    size_t size;
+} AsmInstructions;
+
+
 // PROGRAM
 typedef struct {
     char* name;
@@ -51,6 +57,6 @@ typedef struct {
 } AsmProgram;
 
 
-AsmProgram transform_ast(CProgram ast);
+AsmProgram transform_program(CProgram ast);
 
 #endif
