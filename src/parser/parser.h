@@ -8,12 +8,6 @@
 #include "../lexer/token.h"
 #include "ast.h"
 
-typedef struct {
-    TokenBuf tokens;
-    Program* ast;
-} Parser;
-
-Parser parser_init(TokenBuf tokens);
-bool parser_run(Parser* this);
+Program parse_program(TokenBuf tokens);
 
 #endif

@@ -5,7 +5,7 @@
 
 #include "lexer/lexer.h"
 #include "lexer/token.h"
-
+#include "parser/parser.h"
 
 
 
@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
     }
 
     // parser
-
+    Program ast = parse_program(tokens);
 
     if (stage == STAGE_PARSER) {
         tokenbuf_destruct(&tokens);
