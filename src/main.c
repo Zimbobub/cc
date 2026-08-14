@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
     }
 
     // parser
-    Program ast = parse_program(tokens);
+    CProgram ast = parse_program(tokens);
     print_program(&ast);
 
     if (stage == STAGE_PARSER) {

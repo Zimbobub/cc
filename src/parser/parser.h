@@ -8,6 +8,6 @@
 #include "../lexer/token.h"
 #include "ast.h"
 
-Program parse_program(TokenBuf tokens);
+CProgram parse_program(TokenBuf tokens);
 
 #endif

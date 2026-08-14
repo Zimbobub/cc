@@ -39,29 +39,29 @@ void expect_keyword(TokenBuf tokens, size_t* i, const char* keyword) {
 
 
 
-Expression parse_expression(TokenBuf tokens, size_t* i) {
+CExpression parse_expression(TokenBuf tokens, size_t* i) {
     printf("parse expression\n");
     int val = expect_number(tokens, i);
-    Expression expr = {
+    CExpression expr = {
         EXPRESSION_CONST,
         .expr = { .constant.val = val }
     };
     return expr;
 }
 
-Statement parse_statement(TokenBuf tokens, size_t* i) {
+CStatement parse_statement(TokenBuf tokens, size_t* i) {
     printf("parse statement\n");
     expect_keyword(tokens, i, "return");
-    Expression expr = parse_expression(tokens, i);
+    CExpression expr = parse_expression(tokens, i);
     expect_token(tokens, i, Semicolon);
-    Statement statement = {
+    CStatement statement = {
         .type=STATEMENT_RETURN,
         .statement = { .ret = expr }
     };
     return statement;
 }
 
-FunctionDefinition parse_function_definition(TokenBuf tokens, size_t* i) {
+CFunctionDefinition parse_function_definition(TokenBuf tokens, size_t* i) {
     printf("parse function definition\n");
     expect_keyword(tokens, i, "int");
 
@@ -71,21 +71,21 @@ FunctionDefinition parse_function_definition(TokenBuf tokens, size_t* i) {
     expect_token(tokens, i, RParen);
 
     expect_token(tokens, i, LBrace);    
-    Statement statement = parse_statement(tokens, i);
+    CStatement statement = parse_statement(tokens, i);
     expect_token(tokens, i, RBrace);
 
-    FunctionDefinition func = { name, statement };
+    CFunctionDefinition func = { name, statement };
     return func;
 }
 
-Program parse_program(TokenBuf tokens) {
+CProgram parse_program(TokenBuf tokens) {
     printf("parse program\n");
     size_t i = 0;
-    FunctionDefinition func = parse_function_definition(tokens, &i);
+    CFunctionDefinition func = parse_function_definition(tokens, &i);
 
     // expect no more tokens
     if (i < tokens.n_tokens) throw_err_at_token(tokens, &i, "Unexpected token at end of file");
 
-    Program program = { func };
+    CProgram program = { func };
     return program;
 }

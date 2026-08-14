@@ -9,71 +9,71 @@ typedef enum {
     OPERATOR_SUB,
     OPERATOR_MUL,
     OPERATOR_DIV,
-} Operator;
+} COperator;
 
 
 // EXPRESSIONS
 typedef struct {
     int left;
     int right;
-    Operator op;
-} BinaryExpression;
+    COperator op;
+} CBinaryExpression;
 
 typedef struct {
     int val;
-    Operator op;
-} UnaryExpression;
+    COperator op;
+} CUnaryExpression;
 
 typedef struct {
     int val;
-} ConstantExpression;
+} CConstantExpression;
 
 typedef enum {
     EXPRESSION_CONST,
     EXPRESSION_UNARY,
     EXPRESSION_BINARY
-} ExpressionType;
+} CExpressionType;
 
 typedef struct {
-    ExpressionType type;
+    CExpressionType type;
     union {
-        ConstantExpression constant;
-        UnaryExpression unary;
-        BinaryExpression binary;
+        CConstantExpression constant;
+        CUnaryExpression unary;
+        CBinaryExpression binary;
     } expr;
-} Expression;
+} CExpression;
 
 
 // STATEMENTS
 typedef enum {
     STATEMENT_RETURN
-} StatementType;
+} CStatementType;
 
 typedef struct {
-    StatementType type;
+    CStatementType type;
     union {
-        Expression ret;
+        CExpression ret;
     } statement;
-} Statement;
+} CStatement;
 
 
 // PROGRAM
 typedef struct {
     char* name;
-    Statement body;
-} FunctionDefinition;
+    CStatement body;
+} CFunctionDefinition;
 
 typedef struct {
-    FunctionDefinition function_definition;
-} Program;
+    CFunctionDefinition function_definition;
+} CProgram;
 
 
 
 
-void print_expr(Expression* expr, int depth);
-void print_statement(Statement* stmnt, int depth);
-void print_function_definition(FunctionDefinition* func, int depth);
-void print_program(Program* program);
+void print_expr(CExpression* expr, int depth);
+void print_statement(CStatement* stmnt, int depth);
+void print_function_definition(CFunctionDefinition* func, int depth);
+void print_program(CProgram* program);
 
 
 #endif
