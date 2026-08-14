@@ -153,7 +153,14 @@ int main(int argc, char* argv[]) {
     // emit code
     char* assembly = emit_asm_program(&asm_ast);
     printf("%s\n", assembly);
-    return 0;
+
+    FILE* out = fopen(assembly_file, "w");
+    if (out == NULL) {
+        printf("Unable to open assembly file (%s)\n", assembly_file);
+        return EXIT_FAILURE;
+    }
+    fwrite(assembly, sizeof(char), strlen(assembly), out);
+    fclose(out);
 
     // assemble and link
     run_assembler(assembly_file, exec_file);
