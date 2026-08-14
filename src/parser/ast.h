@@ -2,6 +2,7 @@
 #define AST_H
 
 #include <stddef.h>
+#include <stdio.h>
 
 typedef enum {
     OPERATOR_ADD,
@@ -66,6 +67,13 @@ typedef struct {
     FunctionDefinition function_definition;
 } Program;
 
+
+
+
+void print_expr(Expression* expr, size_t depth);
+void print_statement(Statement* stmnt, size_t depth);
+void print_function_definition(FunctionDefinition* func, size_t depth);
+void print_program(Program* program);
 
 
 #endif
