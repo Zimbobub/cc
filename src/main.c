@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
 
     char *preprocessed_file = strdup(input_file);
     char *assembly_file = strdup(input_file);
-    char *exec_file = strndup(input_file, strlen(input_file-2)); // no file extension
+    char *exec_file = strndup(input_file, strlen(input_file)-2); // no file extension
 
     // change file extensions
     preprocessed_file[strlen(preprocessed_file)-1] = 'i';
