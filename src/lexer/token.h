@@ -31,6 +31,7 @@ typedef enum {
 typedef struct {
     TokenType type;
     char* src;
+    const char* file_name;
     size_t line_num;
     size_t col_num;
 } Token;

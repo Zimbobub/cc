@@ -74,6 +74,7 @@ void clear_buffer(Lexer *this) {
 void consume_token(Lexer *this,  TokenType type) {
     // make token
     Token token = {0};
+    token.file_name = this->file_name; // can just copy the pointer
     token.line_num = this->line;
     token.col_num = this->col;
     token.type = type;

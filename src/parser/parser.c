@@ -2,7 +2,7 @@
 
 
 void throw_err_at_token(TokenBuf tokens, size_t* i, const char* msg) {
-    printf("Parser error at %ld:%ld\n", tokens.tokens[*i].line_num, tokens.tokens[*i].col_num);
+    printf("Parser error at %s:%ld:%ld\n", tokens.tokens[*i].file_name, tokens.tokens[*i].line_num, tokens.tokens[*i].col_num);
     printf("%s\n", msg);
     exit(EXIT_FAILURE);
 }
