@@ -1,7 +1,7 @@
 #include "codegen.h"
 
 
-void throw_err(const char* msg) {
+void throw_codegen_err(const char* msg) {
     printf("Codegen error\n");
     printf("%s\n", msg);
     exit(1);
@@ -14,7 +14,7 @@ AsmInstructions transform_expression(CExpression ast) {
             .instructions=malloc(sizeof(AsmInstruction)),
             .size=1
         };
-        if (instructions.instructions == NULL) throw_err("Malloc failed");
+        if (instructions.instructions == NULL) throw_codegen_err("Malloc failed");
 
         AsmInstruction instr = {
             .type=INSTRUCTION_MOV,
@@ -26,7 +26,7 @@ AsmInstructions transform_expression(CExpression ast) {
         };
         instructions.instructions[0] = instr;
     } else {
-        throw_err("Unknown expression type");
+        throw_codegen_err("Unknown expression type");
     }
 }
 
@@ -36,7 +36,7 @@ AsmInstructions transform_statement(CStatement ast) {
             .instructions=malloc(2*sizeof(AsmInstruction)),
             .size=2
         };
-        if (instructions.instructions == NULL) throw_err("Malloc failed");
+        if (instructions.instructions == NULL) throw_codegen_err("Malloc failed");
 
         // mov <val> <reg>
         instructions.instructions[0] = (AsmInstruction) {

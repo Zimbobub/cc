@@ -20,6 +20,7 @@ set(SOURCES
     src/parser/ast.c
     src/codegen/codegen.c
     src/codegen/asm.c
+    src/code_emission/emission.c
 )
 
 add_executable(mycc ${SOURCES})

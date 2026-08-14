@@ -7,7 +7,7 @@
 #include "lexer/token.h"
 #include "parser/parser.h"
 #include "codegen/codegen.h"
-
+#include "code_emission/emission.h"
 
 typedef enum {
     STAGE_LEXER,
@@ -149,6 +149,11 @@ int main(int argc, char* argv[]) {
         free(exec_file);
         return EXIT_SUCCESS;
     }
+
+    // emit code
+    char* assembly = emit_asm_program(&asm_ast);
+    printf("%s\n", assembly);
+    return 0;
 
     // assemble and link
     run_assembler(assembly_file, exec_file);
