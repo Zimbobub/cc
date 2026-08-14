@@ -184,9 +184,6 @@ void lexer_run(Lexer *this) {
             c = ' ';
         };
 
-        // skip comments
-        // whi
-
         // printf("%s:%ld:%ld '%c' 0x%x len:%ld '%s'\n", this->file_name, this->line, this->col, c, c, this->input_buf_size, this->input_buf);
 
         this->col++;
