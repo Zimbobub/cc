@@ -63,8 +63,12 @@ AsmInstructions transform_statement(CStatement ast) {
 }
 
 AsmFunctionDefinition transform_func(CFunctionDefinition ast) {
+    // TODO: allow multiple statements
+    AsmInstructions instructions = transform_statement(ast.body);
     AsmFunctionDefinition func = {
-        .name=ast.name
+        .name=ast.name,
+        .instructions=instructions.instructions,
+        .n_instructions=instructions.size
     };
     return func;
 }

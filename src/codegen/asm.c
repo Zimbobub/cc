@@ -11,18 +11,18 @@ void print_asm_operand(AsmOperand* op) {
 }
 
 void print_asm_instruction(AsmInstruction* instr, int depth) {
-    printf("%*cStatement (return) {\n", depth, ' ');
+    printf("%*cInstruction {\n", depth, ' ');
     if (instr->type == INSTRUCTION_MOV) {
-        printf("%*cmov (", depth, ' ');
+        printf("%*cmov (", depth+2, ' ');
         print_asm_operand(&instr->instruction.mov.src);
         printf(" to ");
         print_asm_operand(&instr->instruction.mov.dst);
         printf(")\n");
 
     } else if (instr->type == INSTRUCTION_RET) {
-        printf("%*cret", depth, ' ');
+        printf("%*cret\n", depth+2, ' ');
     } else {
-        printf("%*cUnknown instruction", depth, ' ');
+        printf("%*cUnknown instruction\n", depth+2, ' ');
     }
     printf("%*c}\n", depth, ' ');
 }
