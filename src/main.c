@@ -86,9 +86,14 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    char *preprocessed_file = strdup(input_file);
-    char *assembly_file = strdup(input_file);
-    char *exec_file = strndup(input_file, strlen(input_file)-2); // no file extension
+    size_t filename_len = strlen(input_file);
+    char *preprocessed_file = malloc(filename_len+1);
+    char *assembly_file = malloc(filename_len+1);
+    char *exec_file = malloc(filename_len-1); // no file extension
+
+    strcpy(preprocessed_file, input_file);
+    strcpy(assembly_file, input_file);
+    strncpy(exec_file, input_file, filename_len-2);
 
     // change file extensions
     preprocessed_file[strlen(preprocessed_file)-1] = 'i';

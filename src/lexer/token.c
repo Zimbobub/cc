@@ -1,5 +1,28 @@
 #include "token.h"
 
+char* get_token_name(TokenType type) {
+    static const char *token_types[] = {
+        "Unknown",
+
+        "Keyword",
+        "Identifier",
+        "Number",
+        "StringLiteral",
+    
+        "Semicolon",
+        "Period",
+        "Comma",
+    
+        "LParen",
+        "RParen",
+        "LBracket",
+        "RBracket",
+        "LBrace",
+        "RBrace"
+    };
+    return token_types[type];
+}
+
 void print_token(Token *token) {
     static const char *token_types[] = {
         "Unknown",
