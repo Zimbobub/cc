@@ -18,6 +18,7 @@ set(SOURCES
     src/lexer/token.c
     src/parser/parser.c
     src/parser/ast.c
+    src/codegen/asm.c
 )
 
 add_executable(mycc ${SOURCES})

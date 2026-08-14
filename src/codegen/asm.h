@@ -3,6 +3,9 @@
 
 #include <stddef.h>
 
+#include "../parser/parser.h"
+#include "../parser/ast.h"
+
 // OPERAND
 typedef enum {
     OPERAND_IMMEDIATE,
@@ -47,5 +50,7 @@ typedef struct {
     AsmFunctionDefinition function_definition;
 } AsmProgram;
 
+
+AsmProgram transform_ast(CProgram ast);
 
 #endif
