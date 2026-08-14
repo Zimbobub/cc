@@ -23,14 +23,12 @@ void print_usage() {
 
 
 int main(int argc, char* argv[]) {
-    for (int i = 0; i < argc; i++) {
-        printf("%s\n", argv[i]);
-    }
+    // for (int i = 0; i < argc; i++) {
+    //     printf("%s\n", argv[i]);
+    // }
     // return 0;
 
-
     char *input_file;
-    char *output_file;
     Stage stage = STAGE_CODE_EMISSION;
 
     if (argc == 2) {
@@ -57,36 +55,95 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
+    printf("Compiling %s\n", input_file);
+
+    char *preprocessed_file = strdup(input_file);
+    char *assembly_file = strdup(input_file);
+    char *object_file = strdup(input_file);
+    char *exec_file = strndup(input_file, strlen(input_file-2)); // no file extension
+
+    // change file extensions
+    preprocessed_file[strlen(preprocessed_file)-1] = 'i';
+    assembly_file[strlen(assembly_file)-1] = 's';
+    object_file[strlen(object_file)-1] = 'o';
 
 
-    // // if user enters -h, or uses incorrect args
-    // if ((argc >= 2 && strcmp(argv[1], "-h") == 0) || (argc != 3 && argc != 4)) {
-    //     printf("Usage: cc <filename.c> <output.s> <stage>\nStage: 'lex' | 'parse' | 'codegen'\nIf stage not given, defaults to code emission\n");
-    //     return EXIT_FAILURE;
-    // }
 
-    // char *input_file = argv[1];
-    // char *output_file = argv[2];
-    // Stage stage = STAGE_CODE_EMISSION;
-    // if (argc == 4) {
-    //     if (strcmp(argv[3], "lex") == 0) stage = STAGE_LEXER;
-    //     else if (strcmp(argv[3], "parse") == 0) stage = STAGE_PARSER;
-    //     else if (strcmp(argv[3], "codegen") == 0) stage = STAGE_CODEGEN;
-    //     else {
-    //         printf("Usage: cc <filename.c> <output.s> <stage>\nStage: 'lex' | 'parse' | 'codegen'\nIf stage not given, defaults to code emission\n");
-    //         return EXIT_FAILURE;
-    //     }
-    // }
+    // preprocess
+    {
+        char preprocess_cmd_format[] = "gcc -E -P  -o ";
+        char* command_buf = malloc(strlen(preprocess_cmd_format) + strlen(input_file) + strlen(preprocessed_file) + 1);
+        sprintf(command_buf, "gcc -E -P %s -o %s", input_file, preprocessed_file);
 
-    Lexer *lexer = lexer_init(input_file);
+        printf("Running %s\n", command_buf);
+        if (system(command_buf) != 0) {
+            return EXIT_FAILURE;
+        }
+        free(command_buf);
+        printf("Preprocessor succeeded\n");
+    }
+
+    // lexer
+    Lexer *lexer = lexer_init(preprocessed_file);
     lexer_run(lexer);
 
-    // for (int i = 0; i < lexer->n_tokens; i++) {
-        // print_token(&lexer->tokens[i]);
-    // }
+    for (int i = 0; i < lexer->n_tokens; i++) {
+        print_token(&lexer->tokens[i]);
+    }
 
+    if (stage == STAGE_LEXER) {
+        lexer_destruct(lexer);
+        free(preprocessed_file);
+        free(assembly_file);
+        free(object_file);
+        free(exec_file);
+        return EXIT_SUCCESS;
+    }
+
+    // parser
+
+
+    if (stage == STAGE_PARSER) {
+        lexer_destruct(lexer);
+        free(preprocessed_file);
+        free(assembly_file);
+        free(object_file);
+        free(exec_file);
+        return EXIT_SUCCESS;
+    }
+
+    // asm gen
+
+
+    if (stage == STAGE_CODEGEN) {
+        lexer_destruct(lexer);
+        free(preprocessed_file);
+        free(assembly_file);
+        free(object_file);
+        free(exec_file);
+        return EXIT_SUCCESS;
+    }
+
+    // assemble and link
+    {
+        char assemble_cmd_format[] = "gcc -o ";
+        char* command_buf = malloc(strlen(assemble_cmd_format) + strlen(assembly_file) + strlen(exec_file) + 1);
+        sprintf(command_buf, "gcc %s -o %s", assembly_file, exec_file);
+
+        printf("Running %s\n", command_buf);
+        if (system(command_buf) != 0) {
+            return EXIT_FAILURE;
+        }
+        free(command_buf);
+        printf("Assembly succeeded\n");
+    }
+
+    // cleanup
     lexer_destruct(lexer);
-
+    free(preprocessed_file);
+    free(assembly_file);
+    free(object_file);
+    free(exec_file);
     printf("success\n");
 
     return EXIT_SUCCESS;
