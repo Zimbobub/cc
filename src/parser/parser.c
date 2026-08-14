@@ -81,6 +81,10 @@ Program parse_program(TokenBuf tokens) {
     printf("parse program\n");
     size_t i = 0;
     FunctionDefinition func = parse_function_definition(tokens, &i);
+
+    // expect no more tokens
+    if (i < tokens.n_tokens) throw_err_at_token(tokens, &i, "Unexpected token at end of file");
+
     Program program = { func };
     return program;
 }
