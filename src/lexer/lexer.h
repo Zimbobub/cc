@@ -35,7 +35,9 @@ typedef struct {
 } Lexer;
 
 Lexer* lexer_init(const char* file_name);
-void lexer_destruct(Lexer *this);
-void lexer_run(Lexer *this);
+// free everything except the tokens
+TokenBuf lexer_destruct(Lexer *this);
+// return true if err
+bool lexer_run(Lexer *this);
 
 #endif

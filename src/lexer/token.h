@@ -31,6 +31,12 @@ typedef struct {
     size_t col_num;
 } Token;
 
+typedef struct {
+    Token* tokens;
+    size_t n_tokens;
+} TokenBuf;
+
 void print_token(Token *token);
+void tokenbuf_destruct(TokenBuf* this);
 
 #endif

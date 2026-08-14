@@ -99,19 +99,19 @@ int main(int argc, char* argv[]) {
 
     // lexer
     Lexer *lexer = lexer_init(preprocessed_file);
-    lexer_run(lexer);
+    bool err = lexer_run(lexer);
 
-    if (lexer->err) {
-        printf("LEXER ERROR: %s\n", lexer->err_msg);
-    } else {
+    if (err) printf("LEXER ERROR: %s\n", lexer->err_msg);
+    else {
         for (int i = 0; i < lexer->n_tokens; i++) {
             print_token(&lexer->tokens[i]);
         }
     }
 
-    if (stage == STAGE_LEXER || lexer->err) {
-        bool err = lexer->err; // prevent use after free
-        lexer_destruct(lexer);
+    TokenBuf tokens = lexer_destruct(lexer);
+
+    if (stage == STAGE_LEXER || err) {
+        tokenbuf_destruct(&tokens);
         cleanup_files(preprocessed_file, "");
         free(preprocessed_file);
         free(assembly_file);
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
 
 
     if (stage == STAGE_PARSER) {
-        lexer_destruct(lexer);
+        tokenbuf_destruct(&tokens);
         cleanup_files(preprocessed_file, "");
         free(preprocessed_file);
         free(assembly_file);
@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
 
 
     if (stage == STAGE_CODEGEN) {
-        lexer_destruct(lexer);
+        tokenbuf_destruct(&tokens);
         cleanup_files(preprocessed_file, assembly_file);
         free(preprocessed_file);
         free(assembly_file);
@@ -147,8 +147,7 @@ int main(int argc, char* argv[]) {
     run_assembler(assembly_file, exec_file);
 
     // cleanup
-    lexer_destruct(lexer);
-
+    tokenbuf_destruct(&tokens);
     cleanup_files(preprocessed_file, assembly_file);
     free(preprocessed_file);
     free(assembly_file);
