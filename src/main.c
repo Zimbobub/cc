@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
 
     if (err) printf("LEXER ERROR: %s\n", lexer->err_msg);
     else {
-        for (int i = 0; i < lexer->n_tokens; i++) {
+        for (size_t i = 0; i < lexer->n_tokens; i++) {
             print_token(&lexer->tokens[i]);
         }
     }

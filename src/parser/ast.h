@@ -70,9 +70,9 @@ typedef struct {
 
 
 
-void print_expr(Expression* expr, size_t depth);
-void print_statement(Statement* stmnt, size_t depth);
-void print_function_definition(FunctionDefinition* func, size_t depth);
+void print_expr(Expression* expr, int depth);
+void print_statement(Statement* stmnt, int depth);
+void print_function_definition(FunctionDefinition* func, int depth);
 void print_program(Program* program);
 
 

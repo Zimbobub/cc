@@ -1,6 +1,6 @@
 #include "token.h"
 
-char* get_token_name(TokenType type) {
+const char* get_token_name(TokenType type) {
     static const char *token_types[] = {
         "Unknown",
 
@@ -18,7 +18,10 @@ char* get_token_name(TokenType type) {
         "LBracket",
         "RBracket",
         "LBrace",
-        "RBrace"
+        "RBrace",
+
+        "Increment",
+        "Decrement"
     };
     return token_types[type];
 }
@@ -48,7 +51,7 @@ void print_token(Token *token) {
 }
 
 void tokenbuf_destruct(TokenBuf* this) {
-    for (int i = 0; i < this->n_tokens; i++) {
+    for (size_t i = 0; i < this->n_tokens; i++) {
         free(this->tokens[i].src);
     }
     free(this->tokens);

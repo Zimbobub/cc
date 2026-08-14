@@ -22,7 +22,10 @@ typedef enum {
     LBracket,
     RBracket,
     LBrace,
-    RBrace
+    RBrace,
+
+    Increment,
+    Decrement
 } TokenType;
 
 typedef struct {
@@ -37,7 +40,7 @@ typedef struct {
     size_t n_tokens;
 } TokenBuf;
 
-char* get_token_name(TokenType type);
+const char* get_token_name(TokenType type);
 void print_token(Token *token);
 void tokenbuf_destruct(TokenBuf* this);
 

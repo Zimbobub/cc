@@ -14,7 +14,9 @@ TokenType get_single_char_token_type(char c) {
 }
 
 TokenType get_double_char_token_type(char c1, char c2) {
-    return Unknown;
+    if (c1 == '+' && c2 == '+') return Increment;
+    else if (c1 == '-' && c2 == '-') return Decrement;
+    else return Unknown;
 }
 
 bool is_operator(char c) {
@@ -54,7 +56,7 @@ bool is_keyword(const char* str, size_t len) {
 
 bool is_int(const char *str, size_t len) {
     if (len == 0) return false;
-    for (int i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
         if (!isdigit(str[i])) return false;
     }
     return true;

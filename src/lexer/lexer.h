@@ -13,7 +13,7 @@
 
 typedef struct {
     // position
-    char *file_name;
+    const char *file_name;
     size_t line;
     size_t col;
     FILE *fp;

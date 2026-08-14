@@ -11,7 +11,7 @@ void throw_err_at_token(TokenBuf tokens, size_t* i, const char* msg) {
 void expect_token(TokenBuf tokens, size_t* i, TokenType token_type) {
     if (*i >= tokens.n_tokens) throw_err_at_token(tokens, i, "Index out of range");
     if (tokens.tokens[*i].type != token_type) {
-        char* msg[50] = {0}; // token type names dont get any larger than 15 char
+        char msg[50] = {0}; // token type names dont get any larger than 15 char
         snprintf(msg, 49, "Expected %s, got %s", get_token_name(token_type), get_token_name(tokens.tokens[*i].type));
         throw_err_at_token(tokens, i, msg);
     }
@@ -31,7 +31,7 @@ char* expect_identifier(TokenBuf tokens, size_t* i) {
 void expect_keyword(TokenBuf tokens, size_t* i, const char* keyword) {
     expect_token(tokens, i, Keyword);
     if (strcmp(tokens.tokens[(*i)-1].src, keyword) != 0) {
-        char* msg[50] = {0}; // token type names dont get any larger than 15 char
+        char msg[50] = {0}; // token type names dont get any larger than 15 char
         snprintf(msg, 49, "Expected keyword '%s', got '%s'", keyword, tokens.tokens[(*i)-1].src);
         throw_err_at_token(tokens, i, msg);
     }
@@ -42,8 +42,10 @@ void expect_keyword(TokenBuf tokens, size_t* i, const char* keyword) {
 Expression parse_expression(TokenBuf tokens, size_t* i) {
     printf("parse expression\n");
     int val = expect_number(tokens, i);
-    Expression expr = { EXPRESSION_CONST, 0 };
-    expr.expr.constant.val = val;
+    Expression expr = {
+        EXPRESSION_CONST,
+        .expr = { .constant.val = val }
+    };
     return expr;
 }
 
@@ -53,10 +55,9 @@ Statement parse_statement(TokenBuf tokens, size_t* i) {
     Expression expr = parse_expression(tokens, i);
     expect_token(tokens, i, Semicolon);
     Statement statement = {
-        STATEMENT_RETURN,
-        0
+        .type=STATEMENT_RETURN,
+        .statement = { .ret = expr }
     };
-    statement.statement.ret = expr;
     return statement;
 }
 
