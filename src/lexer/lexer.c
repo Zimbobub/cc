@@ -10,6 +10,8 @@ TokenType get_single_char_token_type(char c) {
     else if (c == ']') return RBracket;
     else if (c == '{') return LBrace;
     else if (c == '}') return RBrace;
+    else if (c == '~') return BitwiseNot;
+    else if (c == '-') return Minus;
     else return Unknown;
 }
 
@@ -20,7 +22,7 @@ TokenType get_double_char_token_type(char c1, char c2) {
 }
 
 bool is_operator(char c) {
-    return (strchr("+-*/%<>=", c) != NULL);
+    return (strchr("+-*/%<>=!~&|^", c) != NULL);
 }
 
 bool is_delimiter(char c) {

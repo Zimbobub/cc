@@ -13,6 +13,7 @@ typedef enum {
     Number,
     StringLiteral,
 
+    // 1 char
     Semicolon,
     Period,
     Comma,
@@ -24,6 +25,10 @@ typedef enum {
     LBrace,
     RBrace,
 
+    BitwiseNot,
+    Minus,
+
+    // 2 char
     Increment,
     Decrement
 } TokenType;

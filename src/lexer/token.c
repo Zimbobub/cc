@@ -20,6 +20,9 @@ const char* get_token_name(TokenType type) {
         "LBrace",
         "RBrace",
 
+        "BitwiseNot",
+        "Minus",
+
         "Increment",
         "Decrement"
     };
@@ -27,27 +30,7 @@ const char* get_token_name(TokenType type) {
 }
 
 void print_token(Token *token) {
-    static const char *token_types[] = {
-        "Unknown",
-
-        "Keyword",
-        "Identifier",
-        "Number",
-        "StringLiteral",
-    
-        "Semicolon",
-        "Period",
-        "Comma",
-    
-        "LParen",
-        "RParen",
-        "LBracket",
-        "RBracket",
-        "LBrace",
-        "RBrace"
-    };
-    
-    printf("%3ld:%-3ld type: %2d %10s '%s'\n", token->line_num, token->col_num, token->type, token_types[token->type], token->src);
+    printf("%3ld:%-3ld type: %2d %10s '%s'\n", token->line_num, token->col_num, token->type, get_token_name(token->type), token->src);
 }
 
 void tokenbuf_destruct(TokenBuf* this) {
