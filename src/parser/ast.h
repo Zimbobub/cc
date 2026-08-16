@@ -4,37 +4,49 @@
 #include <stddef.h>
 #include <stdio.h>
 
+
+// OPERATORS
+// repr char for easy printing
 typedef enum {
-    OPERATOR_ADD,
-    OPERATOR_SUB,
-    OPERATOR_MUL,
-    OPERATOR_DIV,
-} COperator;
+    OPERATOR_ADD = '+',
+    OPERATOR_SUB = '-',
+    OPERATOR_MUL = '*',
+    OPERATOR_DIV = '/',
+} CBinaryOperator;
+
+typedef enum {
+    OPERATOR_BITWISE_COMPLEMENT = '~',
+    OPERATOR_NEGATE = '-'
+} CUnaryOperator;
+
 
 
 // EXPRESSIONS
-typedef struct {
-    int left;
-    int right;
-    COperator op;
-} CBinaryExpression;
-
-typedef struct {
-    int val;
-    COperator op;
-} CUnaryExpression;
-
-typedef struct {
-    int val;
-} CConstantExpression;
-
 typedef enum {
     EXPRESSION_CONST,
     EXPRESSION_UNARY,
     EXPRESSION_BINARY
 } CExpressionType;
 
+// forward declaration (for pointers)
+typedef struct CExpression CExpression;
+
 typedef struct {
+    CExpression* left;
+    CExpression* right;
+    CBinaryOperator op;
+} CBinaryExpression;
+
+typedef struct {
+    CExpression* val;
+    CUnaryOperator op;
+} CUnaryExpression;
+
+typedef struct {
+    int val;
+} CConstantExpression;
+
+typedef struct CExpression {
     CExpressionType type;
     union {
         CConstantExpression constant;
@@ -42,6 +54,7 @@ typedef struct {
         CBinaryExpression binary;
     } expr;
 } CExpression;
+
 
 
 // STATEMENTS
@@ -55,6 +68,7 @@ typedef struct {
         CExpression ret;
     } statement;
 } CStatement;
+
 
 
 // PROGRAM

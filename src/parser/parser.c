@@ -41,12 +41,46 @@ void expect_keyword(TokenBuf tokens, size_t* i, const char* keyword) {
 
 CExpression parse_expression(TokenBuf tokens, size_t* i) {
     printf("parse expression\n");
-    int val = expect_number(tokens, i);
-    CExpression expr = {
-        EXPRESSION_CONST,
-        .expr = { .constant.val = val }
-    };
-    return expr;
+    TokenType next = tokens.tokens[*i].type;
+    if (next == Number) {
+        // constant
+        int val = expect_number(tokens, i);
+        CExpression expr = {
+            EXPRESSION_CONST,
+            .expr.constant = { .val = val }
+        };
+        return expr;
+    } else if (next == LParen) {
+        // expr in parentheses
+        expect_token(tokens, i, LParen);
+        CExpression expr = parse_expression(tokens, i);
+        expect_token(tokens, i, RParen);
+        return expr;
+    } else if (next == BitwiseNot || next == Minus) {
+        // unary operator
+        CUnaryOperator op = OPERATOR_BITWISE_COMPLEMENT;
+        if (next == BitwiseNot) {
+            expect_token(tokens, i, BitwiseNot);
+            op = OPERATOR_BITWISE_COMPLEMENT;
+        } else if (next == Minus) {
+            expect_token(tokens, i, Minus);
+            op = OPERATOR_SUB;
+        }
+
+        CExpression* inner = malloc(sizeof(CExpression));
+        if (inner == NULL) throw_err_at_token(tokens, i, "malloc failed");
+        *inner = parse_expression(tokens, i);
+        CExpression expr = {
+            EXPRESSION_UNARY,
+            .expr.unary = {
+                .op = op,
+                .val = inner
+            }
+        };
+        return expr;
+    } else {
+        throw_err_at_token(tokens, i, "unknown expression token");
+    }
 }
 
 CStatement parse_statement(TokenBuf tokens, size_t* i) {
