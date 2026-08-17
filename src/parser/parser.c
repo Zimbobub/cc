@@ -1,19 +1,11 @@
 #include "parser.h"
 
 
-void throw_err_at_token(TokenBuf tokens, size_t* i, const char* msg) {
-    printf("Parser error at %s:%ld:%ld\n", tokens.tokens[*i].file_name, tokens.tokens[*i].line_num, tokens.tokens[*i].col_num);
-    printf("%s\n", msg);
-    exit(EXIT_FAILURE);
-}
-
 
 void expect_token(TokenBuf tokens, size_t* i, TokenType token_type) {
-    if (*i >= tokens.n_tokens) throw_err_at_token(tokens, i, "Index out of range");
+    if (*i >= tokens.n_tokens) parser_error(&tokens, i, "Index out of range");
     if (tokens.tokens[*i].type != token_type) {
-        char msg[50] = {0}; // token type names dont get any larger than 15 char
-        snprintf(msg, 49, "Expected %s, got %s", get_token_name(token_type), get_token_name(tokens.tokens[*i].type));
-        throw_err_at_token(tokens, i, msg);
+        parser_error(&tokens, i, "Expected %s, got %s", get_token_name(token_type), get_token_name(tokens.tokens[*i].type));
     }
     (*i)++;
 }
@@ -31,9 +23,7 @@ char* expect_identifier(TokenBuf tokens, size_t* i) {
 void expect_keyword(TokenBuf tokens, size_t* i, const char* keyword) {
     expect_token(tokens, i, Keyword);
     if (strcmp(tokens.tokens[(*i)-1].src, keyword) != 0) {
-        char msg[50] = {0}; // token type names dont get any larger than 15 char
-        snprintf(msg, 49, "Expected keyword '%s', got '%s'", keyword, tokens.tokens[(*i)-1].src);
-        throw_err_at_token(tokens, i, msg);
+        parser_error(&tokens, i, "Expected keyword '%s', got '%s'", keyword, tokens.tokens[(*i)-1].src);
     }
 }
 
@@ -68,7 +58,7 @@ CExpression parse_expression(TokenBuf tokens, size_t* i) {
         }
 
         CExpression* inner = malloc(sizeof(CExpression));
-        if (inner == NULL) throw_err_at_token(tokens, i, "malloc failed");
+        if (inner == NULL) parser_error(&tokens, i, "malloc failed");
         *inner = parse_expression(tokens, i);
         CExpression expr = {
             EXPRESSION_UNARY,
@@ -79,7 +69,7 @@ CExpression parse_expression(TokenBuf tokens, size_t* i) {
         };
         return expr;
     } else {
-        throw_err_at_token(tokens, i, "unknown expression token");
+        parser_error(&tokens, i, "unknown expression token (got %s)", get_token_name(next));
     }
 }
 
@@ -118,7 +108,7 @@ CProgram parse_program(TokenBuf tokens) {
     CFunctionDefinition func = parse_function_definition(tokens, &i);
 
     // expect no more tokens
-    if (i < tokens.n_tokens) throw_err_at_token(tokens, &i, "Unexpected token at end of file");
+    if (i < tokens.n_tokens) parser_error(&tokens, &i, "Unexpected token at end of file");
 
     CProgram program = { func };
     return program;
