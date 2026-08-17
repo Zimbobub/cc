@@ -33,6 +33,12 @@ void print_token(Token *token) {
     printf("%3ld:%-3ld type: %2d %10s '%s'\n", token->line_num, token->col_num, token->type, get_token_name(token->type), token->src);
 }
 
+void print_tokens(TokenBuf *tokens) {
+    for (size_t i = 0; i < tokens->n_tokens; ++i) {
+       print_token(&tokens->tokens[i]);
+    }
+}
+
 void tokenbuf_destruct(TokenBuf* this) {
     for (size_t i = 0; i < this->n_tokens; i++) {
         free(this->tokens[i].src);

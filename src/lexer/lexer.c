@@ -160,8 +160,6 @@ Lexer* lexer_init(const char* file_name) {
         exit(EXIT_FAILURE);
     }
 
-    this->err = false;
-
     return this;
 }
 
@@ -180,17 +178,13 @@ TokenBuf lexer_destruct(Lexer *this) {
     // }
     // free(this->tokens);
 
-    if (this->err) {
-        free(this->err_msg);
-    }
-
     free(this);
 
     return tokens;
 }
 
 
-bool lexer_run(Lexer *this) {
+void lexer_run(Lexer *this) {
     int c = 0;
     bool c_was_EOF = false;
     while (!c_was_EOF) {
@@ -227,10 +221,7 @@ bool lexer_run(Lexer *this) {
                 consume_token(this, single_token);
                 if (!isspace(c)) add_char(this, c);
             } else {
-                this->err_len = asprintf(&this->err_msg, "Unknown single char token type: %s:%ld:%ld '%c' 0x%x\n", this->file_name, this->line, this->col, this->input_buf[0], this->input_buf[0]);
-                this->err = true;
-                return true;
-                // exit(EXIT_FAILURE);
+                lexer_error(this, "Unknown special char token type: '%c'\n", this->input_buf[0]);
             }
 
         } else if (this->input_buf_size == 0 || !is_delimiter(c)) {
@@ -247,12 +238,7 @@ bool lexer_run(Lexer *this) {
                 printf("identifier '%s'\n", this->input_buf);
                 consume_token(this, Identifier);
             } else {
-                // printf("Unknown token: '%s'\n", this->input_buf);
-                this->err_len = asprintf(&this->err_msg, "Unknown token: %s:%ld:%ld '%s'\n", this->file_name, this->line, this->col, this->input_buf);
-                this->err = true;
-                return true;
-                //exit(EXIT_FAILURE);
-                // consume_token(this, Unknown);
+                lexer_error(this, "Unknown token: '%s'\n", this->input_buf);
             }
 
             if (!isspace(c)) add_char(this, c);
@@ -260,6 +246,4 @@ bool lexer_run(Lexer *this) {
     }
 
     printf("Finished preprocessing with remaining '%s'\n", this->input_buf);
-
-    return false;
 }

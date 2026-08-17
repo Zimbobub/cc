@@ -104,51 +104,20 @@ int main(int argc, char* argv[]) {
 
     // lexer
     Lexer *lexer = lexer_init(preprocessed_file);
-    bool err = lexer_run(lexer);
-
-    if (err) printf("LEXER ERROR: %s\n", lexer->err_msg);
-    else {
-        for (size_t i = 0; i < lexer->n_tokens; i++) {
-            print_token(&lexer->tokens[i]);
-        }
-    }
-
+    lexer_run(lexer);
     TokenBuf tokens = lexer_destruct(lexer);
-
-    if (stage == STAGE_LEXER || err) {
-        tokenbuf_destruct(&tokens);
-        cleanup_files(preprocessed_file, "");
-        free(preprocessed_file);
-        free(assembly_file);
-        free(exec_file);
-        return (err ? EXIT_FAILURE : EXIT_SUCCESS);
-    }
+    print_tokens(&tokens);
+    if (stage == STAGE_LEXER) return EXIT_SUCCESS;
 
     // parser
     CProgram ast = parse_program(tokens);
     print_c_program(&ast);
-
-    if (stage == STAGE_PARSER) {
-        tokenbuf_destruct(&tokens);
-        cleanup_files(preprocessed_file, "");
-        free(preprocessed_file);
-        free(assembly_file);
-        free(exec_file);
-        return EXIT_SUCCESS;
-    }
+    if (stage == STAGE_PARSER) return EXIT_SUCCESS;
 
     // asm gen
     AsmProgram asm_ast = transform_program(ast);
     print_asm_program(&asm_ast);
-
-    if (stage == STAGE_CODEGEN) {
-        tokenbuf_destruct(&tokens);
-        cleanup_files(preprocessed_file, assembly_file);
-        free(preprocessed_file);
-        free(assembly_file);
-        free(exec_file);
-        return EXIT_SUCCESS;
-    }
+    if (stage == STAGE_CODEGEN) return EXIT_SUCCESS;
 
     // emit code
     char* assembly = emit_asm_program(&asm_ast);
@@ -165,14 +134,7 @@ int main(int argc, char* argv[]) {
     // assemble and link
     run_assembler(assembly_file, exec_file);
 
-    // cleanup
-    tokenbuf_destruct(&tokens);
-    cleanup_files(preprocessed_file, assembly_file);
-    free(preprocessed_file);
-    free(assembly_file);
-    free(exec_file);
     printf("success\n");
-
     return EXIT_SUCCESS;
 }
 

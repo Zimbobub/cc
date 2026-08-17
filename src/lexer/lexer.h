@@ -29,15 +29,18 @@ typedef struct {
     Token *tokens;
 
     // error
-    bool err;
-    char *err_msg; // undefined unless err=true
-    size_t err_len;
+    // bool err;
+    // char *err_msg; // undefined unless err=true
+    // size_t err_len;
 } Lexer;
 
 Lexer* lexer_init(const char* file_name);
 // free everything except the tokens
 TokenBuf lexer_destruct(Lexer *this);
 // return true if err
-bool lexer_run(Lexer *this);
+void lexer_run(Lexer *this);
+
+// requires Lexer type to exist
+#include "../compile_error/compile_error.h"
 
 #endif

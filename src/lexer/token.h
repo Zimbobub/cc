@@ -48,6 +48,7 @@ typedef struct {
 
 const char* get_token_name(TokenType type);
 void print_token(Token *token);
+void print_tokens(TokenBuf *tokens);
 void tokenbuf_destruct(TokenBuf* this);
 
 #endif
