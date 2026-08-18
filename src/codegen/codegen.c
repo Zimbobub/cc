@@ -1,6 +1,7 @@
 #include "codegen.h"
 
-
+// dont need to do pretty printing
+// if these errors occur, theyre not the user's fault
 void throw_codegen_err(const char* msg) {
     printf("Codegen error\n");
     printf("%s\n", msg);
