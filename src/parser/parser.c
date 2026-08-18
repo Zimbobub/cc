@@ -48,7 +48,7 @@ CExpression parse_expression(TokenBuf tokens, size_t* i) {
         return expr;
     } else if (next == BitwiseNot || next == Minus) {
         // unary operator
-        CUnaryOperator op = OPERATOR_BITWISE_COMPLEMENT;
+        UnaryOperator op = OPERATOR_BITWISE_COMPLEMENT;
         if (next == BitwiseNot) {
             expect_token(tokens, i, BitwiseNot);
             op = OPERATOR_BITWISE_COMPLEMENT;

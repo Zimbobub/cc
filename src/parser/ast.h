@@ -17,7 +17,7 @@ typedef enum {
 typedef enum {
     OPERATOR_BITWISE_COMPLEMENT = '~',
     OPERATOR_NEGATE = '-'
-} CUnaryOperator;
+} UnaryOperator;
 
 
 
@@ -39,7 +39,7 @@ typedef struct {
 
 typedef struct {
     CExpression* val;
-    CUnaryOperator op;
+    UnaryOperator op;
 } CUnaryExpression;
 
 typedef struct {
