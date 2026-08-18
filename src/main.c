@@ -6,12 +6,14 @@
 #include "lexer/lexer.h"
 #include "lexer/token.h"
 #include "parser/parser.h"
+#include "IR/IR.h"
 #include "codegen/codegen.h"
 #include "code_emission/emission.h"
 
 typedef enum {
     STAGE_LEXER,
     STAGE_PARSER,
+    STAGE_IR,
     STAGE_CODEGEN,
     STAGE_CODE_EMISSION
 } Stage;
@@ -69,6 +71,7 @@ int main(int argc, char* argv[]) {
 
         if (strcmp(argv[1], "--lex") == 0) stage = STAGE_LEXER;
         else if (strcmp(argv[1], "--parse") == 0) stage = STAGE_PARSER;
+        else if (strcmp(argv[1], "--tacky") == 0) stage = STAGE_IR;
         else if (strcmp(argv[1], "--codegen") == 0) stage = STAGE_CODEGEN;
         else {
             printf("Unknown stage '%s'\n", argv[1]);
@@ -113,6 +116,10 @@ int main(int argc, char* argv[]) {
     CProgram ast = parse_program(tokens);
     print_c_program(&ast);
     if (stage == STAGE_PARSER) return EXIT_SUCCESS;
+
+    IRProgram ir = IR_transform_ast(ast);
+    print_IR_program(&ir);
+    if (stage == STAGE_IR) return EXIT_SUCCESS;
 
     // asm gen
     AsmProgram asm_ast = transform_program(ast);
