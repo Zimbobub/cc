@@ -8,14 +8,24 @@
 // OPERAND
 typedef enum {
     OPERAND_IMMEDIATE,
-    OPERAND_REGISTER
+    OPERAND_REGISTER,
+    OPERAND_PSEUDO,
+    OPERAND_STACK_OFFSET
 } AsmOperandType;
+
+typedef enum {
+    REGISTER_RAX,
+    REGISTER_R10
+} AsmRegister;
 
 typedef struct {
     AsmOperandType type;
     union {
         int immediate;
-    } operand;
+        AsmRegister reg;
+        const char* pseudo;
+        size_t stack_offset;
+    } inner;
 } AsmOperand;
 
 
@@ -23,6 +33,7 @@ typedef struct {
 // INSTRUCTION
 typedef enum {
     INSTRUCTION_MOV,
+    INSTRUCTION_UNARY,
     INSTRUCTION_RET
 } AsmInstructionType;
 
@@ -33,6 +44,10 @@ typedef struct {
             AsmOperand src;
             AsmOperand dst;
         } mov;
+        struct {
+            UnaryOperator op;
+            AsmOperand operand;
+        } unary;
     } instruction;
 } AsmInstruction;
 
@@ -46,8 +61,8 @@ typedef struct {
 // PROGRAM
 typedef struct {
     char* name;
-    AsmInstruction* instructions;
-    size_t n_instructions;
+    AsmInstructions instructions;
+    size_t stack_size; // used to generate stack setup and cleanup
 } AsmFunctionDefinition;
 
 

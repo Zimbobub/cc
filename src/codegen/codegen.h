@@ -3,10 +3,11 @@
 
 #include <stdlib.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "asm.h"
-#include "../parser/ast.h"
+#include "../IR/IR.h"
 
-AsmProgram transform_program(CProgram ast);
+AsmProgram transform_program(IRProgram ir);
 
 #endif

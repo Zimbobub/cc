@@ -17,13 +17,13 @@ size_t int_digits(int val) {
 
 char* emit_asm_operand(AsmOperand* op) {
     if (op->type == OPERAND_IMMEDIATE) {
-        size_t len = int_digits(op->operand.immediate);
+        size_t len = int_digits(op->inner.immediate);
 
         char* str = malloc(len + 2); // +1 for the '$', +1 for \0
         if (str == NULL) throw_code_emission_err("malloc failed");
         memset(str, 0, len+2);
         
-        snprintf(str, len+2, "$%d", op->operand.immediate);
+        snprintf(str, len+2, "$%d", op->inner.immediate);
         return str;
     } else if (op->type == OPERAND_REGISTER) {
         return "\%eax";
@@ -64,8 +64,8 @@ char* emit_asm_function_definition(AsmFunctionDefinition* func) {
 
     snprintf(str, len, ".globl %s\n%s:\n", func->name, func->name);
 
-    for (size_t i = 0; i < func->n_instructions; ++i) {
-        char* instr = emit_asm_instruction(&func->instructions[i]);
+    for (size_t i = 0; i < func->instructions.size; ++i) {
+        char* instr = emit_asm_instruction(&func->instructions.instructions[i]);
 
         str = realloc(str, strlen(str) + strlen(instr) + 1);
         if (str == NULL) throw_code_emission_err("realloc failed");

@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
     if (stage == STAGE_IR) return EXIT_SUCCESS;
 
     // asm gen
-    AsmProgram asm_ast = transform_program(ast);
+    AsmProgram asm_ast = transform_program(ir);
     print_asm_program(&asm_ast);
     if (stage == STAGE_CODEGEN) return EXIT_SUCCESS;
 

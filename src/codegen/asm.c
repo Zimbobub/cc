@@ -2,35 +2,45 @@
 
 void print_asm_operand(AsmOperand* op) {
     if (op->type == OPERAND_IMMEDIATE) {
-        printf("%d", op->operand.immediate);
+        printf("%d", op->inner.immediate);
     } else if (op->type == OPERAND_REGISTER) {
-        printf("reg");
+        if (op->inner.reg == REGISTER_RAX) printf("RAX");
+        else if (op->inner.reg == REGISTER_R10) printf("R10");
+        else printf("?REG?");
+    } else if (op->type == OPERAND_PSEUDO) {
+        printf("var(%s)", op->inner.pseudo);
+    } else if (op->type == OPERAND_STACK_OFFSET) {
+        printf("RSP-%ld", op->inner.stack_offset);
     } else {
         printf("unknown");
     }
 }
 
 void print_asm_instruction(AsmInstruction* instr, int depth) {
-    printf("%*cInstruction {\n", depth, ' ');
+    // printf("%*cInstruction {\n", depth, ' ');
     if (instr->type == INSTRUCTION_MOV) {
-        printf("%*cmov (", depth+2, ' ');
+        printf("%*cmov (", depth, ' ');
         print_asm_operand(&instr->instruction.mov.src);
         printf(" to ");
         print_asm_operand(&instr->instruction.mov.dst);
         printf(")\n");
 
     } else if (instr->type == INSTRUCTION_RET) {
-        printf("%*cret\n", depth+2, ' ');
+        printf("%*cret\n", depth, ' ');
+    } else if (instr->type == INSTRUCTION_UNARY) {
+        printf("%*c%c", depth, ' ', instr->instruction.unary.op);
+        print_asm_operand(&instr->instruction.unary.operand);
+        printf("\n");
     } else {
-        printf("%*cUnknown instruction\n", depth+2, ' ');
+        printf("%*cUnknown instruction\n", depth, ' ');
     }
-    printf("%*c}\n", depth, ' ');
+    // printf("%*c}\n", depth, ' ');
 }
 
 void print_asm_function_definition(AsmFunctionDefinition* func, int depth) {
-    printf("%*cFunctionDefinition (%s) {\n", depth, ' ', func->name);
-    for (size_t i = 0; i < func->n_instructions; ++i) {
-        print_asm_instruction(&func->instructions[i], depth+2);
+    printf("%*cFunctionDefinition (%s) stack: %ld {\n", depth, ' ', func->name, func->stack_size);
+    for (size_t i = 0; i < func->instructions.size; ++i) {
+        print_asm_instruction(&func->instructions.instructions[i], depth+2);
     }
     printf("%*c}\n", depth, ' ');
 }
