@@ -17,16 +17,24 @@ size_t int_digits(int val) {
 
 char* emit_asm_operand(AsmOperand* op) {
     if (op->type == OPERAND_IMMEDIATE) {
-        size_t len = int_digits(op->inner.immediate);
+        size_t digits = int_digits(op->inner.immediate);
 
-        char* str = malloc(len + 2); // +1 for the '$', +1 for \0
+        char* str = malloc(digits + 2); // +1 for the '$', +1 for \0
         if (str == NULL) throw_code_emission_err("malloc failed");
-        memset(str, 0, len+2);
         
-        snprintf(str, len+2, "$%d", op->inner.immediate);
+        snprintf(str, digits+2, "$%d", op->inner.immediate);
         return str;
     } else if (op->type == OPERAND_REGISTER) {
-        return "\%eax";
+        if (op->inner.reg == REGISTER_RAX) return "\%eax";
+        else if (op->inner.reg == REGISTER_R10) return "\%r10d";
+        else throw_code_emission_err("unknown register");
+    } else if (op->type == OPERAND_STACK_OFFSET) {
+        size_t len = int_digits(op->inner.stack_offset) + strlen("-(%rbp)") + 1;
+        char* str = malloc(len);
+        if (str == NULL) throw_code_emission_err("malloc failed");
+        
+        snprintf(str, len, "-%ld(%%rbp)", op->inner.stack_offset);
+        return str;
     } else {
         throw_code_emission_err("unknown operand type");
     }
@@ -39,16 +47,28 @@ char* emit_asm_instruction(AsmInstruction* instr) {
         char* src_str = emit_asm_operand(&instr->inner.mov.src);
         char* dst_str = emit_asm_operand(&instr->inner.mov.dst);
 
-        // printf("OPERANDS %s, %s | %ld %ld\n", src_str, dst_str, strlen(src_str), strlen(dst_str));
-
         size_t instruction_len = strlen(template) + strlen(src_str) + strlen(dst_str) + 1;
         char* str = malloc(instruction_len);
         if (str == NULL) throw_code_emission_err("malloc failed");
 
         snprintf(str, instruction_len, "    movl %s, %s\n", src_str, dst_str);
         return str;
+    } else if (instr->type == INSTRUCTION_UNARY) {
+        char* template;
+        if (instr->inner.unary.op == OPERATOR_NEGATE) template = "    negl %s\n";
+        else if (instr->inner.unary.op == OPERATOR_BITWISE_COMPLEMENT) template = "    notl %s\n";
+        else throw_code_emission_err("unknown unary operator type");
+
+        char* operand_str = emit_asm_operand(&instr->inner.unary.operand);
+
+        size_t len = strlen(template) + strlen(operand_str) + 1;
+        char* str = malloc(len);
+        if (str == NULL) throw_code_emission_err("malloc failed");
+
+        snprintf(str, len, template, operand_str);
+        return str;
     } else if (instr->type == INSTRUCTION_RET) {
-        return "    ret\n";        
+        return "    movq %rbp, %rsp\n    popq %rbp\n    ret\n";        
     } else {
         throw_code_emission_err("unknown instruction type");
     }
@@ -56,13 +76,15 @@ char* emit_asm_instruction(AsmInstruction* instr) {
 
 
 char* emit_asm_function_definition(AsmFunctionDefinition* func) {
-    const char template[] = ".globl \n:\n";
+    const char header_template[] = ".globl \n:\n";
+    const char prologue_template[] = "    pushq %rbp\n    movq %rsp, %rbp\n    subq $, %rsp\n";
 
-    size_t len = strlen(template) + 2*strlen(func->name) + 1;
+    size_t len = strlen(header_template) + 2*strlen(func->name) + strlen(prologue_template) + int_digits(func->stack_size) + 1;
+    
     char* str = malloc(len);
     if (str == NULL) throw_code_emission_err("malloc failed");
 
-    snprintf(str, len, ".globl %s\n%s:\n", func->name, func->name);
+    snprintf(str, len, ".globl %s\n%s:\n    pushq %%rbp\n    movq %%rsp, %%rbp\n    subq $%ld, %%rsp\n", func->name, func->name, func->stack_size);
 
     for (size_t i = 0; i < func->instructions.size; ++i) {
         char* instr = emit_asm_instruction(&func->instructions.instructions[i]);
