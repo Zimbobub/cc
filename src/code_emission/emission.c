@@ -36,8 +36,8 @@ char* emit_asm_operand(AsmOperand* op) {
 char* emit_asm_instruction(AsmInstruction* instr) {
     if (instr->type == INSTRUCTION_MOV) {
         const char template[] = "    movl , \n";
-        char* src_str = emit_asm_operand(&instr->instruction.mov.src);
-        char* dst_str = emit_asm_operand(&instr->instruction.mov.dst);
+        char* src_str = emit_asm_operand(&instr->inner.mov.src);
+        char* dst_str = emit_asm_operand(&instr->inner.mov.dst);
 
         // printf("OPERANDS %s, %s | %ld %ld\n", src_str, dst_str, strlen(src_str), strlen(dst_str));
 

@@ -20,16 +20,16 @@ void print_asm_instruction(AsmInstruction* instr, int depth) {
     // printf("%*cInstruction {\n", depth, ' ');
     if (instr->type == INSTRUCTION_MOV) {
         printf("%*cmov (", depth, ' ');
-        print_asm_operand(&instr->instruction.mov.src);
+        print_asm_operand(&instr->inner.mov.src);
         printf(" to ");
-        print_asm_operand(&instr->instruction.mov.dst);
+        print_asm_operand(&instr->inner.mov.dst);
         printf(")\n");
 
     } else if (instr->type == INSTRUCTION_RET) {
         printf("%*cret\n", depth, ' ');
     } else if (instr->type == INSTRUCTION_UNARY) {
-        printf("%*c%c", depth, ' ', instr->instruction.unary.op);
-        print_asm_operand(&instr->instruction.unary.operand);
+        printf("%*c%c", depth, ' ', instr->inner.unary.op);
+        print_asm_operand(&instr->inner.unary.operand);
         printf("\n");
     } else {
         printf("%*cUnknown instruction\n", depth, ' ');

@@ -36,7 +36,7 @@ AsmInstructions transform_instruction(IRInstruction ir) {
         // mov <val> to RAX
         instructions.instructions[0] = (AsmInstruction) {
             .type=INSTRUCTION_MOV,
-            .instruction.mov={
+            .inner.mov={
                 .src=transform_operand(ir.inner.ret.val),
                 .dst={
                     .type=OPERAND_REGISTER,
@@ -60,7 +60,7 @@ AsmInstructions transform_instruction(IRInstruction ir) {
         // mov src to dst
         instructions.instructions[0] = (AsmInstruction) {
             .type=INSTRUCTION_MOV,
-            .instruction.mov={
+            .inner.mov={
                 .src=transform_operand(ir.inner.unary.src),
                 .dst=transform_operand(ir.inner.unary.dst)
             }
@@ -69,7 +69,7 @@ AsmInstructions transform_instruction(IRInstruction ir) {
         // operate on dst
         instructions.instructions[1] = (AsmInstruction) {
             .type=INSTRUCTION_UNARY,
-            .instruction.unary= {
+            .inner.unary= {
                 .op=ir.inner.unary.op,
                 .operand=transform_operand(ir.inner.unary.dst)
             }

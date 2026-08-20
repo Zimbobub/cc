@@ -48,7 +48,7 @@ typedef struct {
             UnaryOperator op;
             AsmOperand operand;
         } unary;
-    } instruction;
+    } inner;
 } AsmInstruction;
 
 
