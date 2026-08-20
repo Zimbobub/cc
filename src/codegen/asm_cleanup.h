@@ -10,5 +10,6 @@
 #define VARIABLE_SIZE 4
 
 void replace_pseudo_registers(AsmProgram* this);
+void replace_memory_to_memory_instructions(AsmProgram* this);
 
 #endif

@@ -127,6 +127,8 @@ int main(int argc, char* argv[]) {
     print_asm_program(&asm_ast);
     replace_pseudo_registers(&asm_ast);
     print_asm_program(&asm_ast);
+    replace_memory_to_memory_instructions(&asm_ast);
+    print_asm_program(&asm_ast);
     if (stage == STAGE_CODEGEN) return EXIT_SUCCESS;
 
     // emit code
