@@ -25,8 +25,12 @@ typedef enum {
     LBrace,
     RBrace,
 
-    BitwiseNot,
+    Tilde,
+    Plus,
     Minus,
+    Asterisk,
+    ForwardSlash,
+    Percent,
 
     // 2 char
     Increment,

@@ -46,11 +46,11 @@ CExpression parse_expression(TokenBuf tokens, size_t* i) {
         CExpression expr = parse_expression(tokens, i);
         expect_token(tokens, i, RParen);
         return expr;
-    } else if (next == BitwiseNot || next == Minus) {
+    } else if (next == Tilde || next == Minus) {
         // unary operator
         UnaryOperator op = OPERATOR_BITWISE_COMPLEMENT;
-        if (next == BitwiseNot) {
-            expect_token(tokens, i, BitwiseNot);
+        if (next == Tilde) {
+            expect_token(tokens, i, Tilde);
             op = OPERATOR_BITWISE_COMPLEMENT;
         } else if (next == Minus) {
             expect_token(tokens, i, Minus);

@@ -20,9 +20,13 @@ const char* get_token_name(TokenType type) {
         "LBrace",
         "RBrace",
 
-        "BitwiseNot",
+        "Tilde",
+        "Plus",
         "Minus",
-
+        "Asterisk",
+        "ForwardSlash",
+        "Percent",
+    
         "Increment",
         "Decrement"
     };

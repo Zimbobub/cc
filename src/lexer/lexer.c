@@ -10,8 +10,12 @@ TokenType get_single_char_token_type(char c) {
     else if (c == ']') return RBracket;
     else if (c == '{') return LBrace;
     else if (c == '}') return RBrace;
-    else if (c == '~') return BitwiseNot;
+    else if (c == '~') return Tilde;
+    else if (c == '+') return Plus;
     else if (c == '-') return Minus;
+    else if (c == '*') return Asterisk;
+    else if (c == '/') return ForwardSlash;
+    else if (c == '%') return Percent;
     else return Unknown;
 }
 
