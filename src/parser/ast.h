@@ -12,7 +12,8 @@ typedef enum {
     OPERATOR_SUB = '-',
     OPERATOR_MUL = '*',
     OPERATOR_DIV = '/',
-} CBinaryOperator;
+    OPERATOR_MOD = '%',
+} BinaryOperator;
 
 typedef enum {
     OPERATOR_BITWISE_COMPLEMENT = '~',
@@ -34,7 +35,7 @@ typedef struct CExpression CExpression;
 typedef struct {
     CExpression* left;
     CExpression* right;
-    CBinaryOperator op;
+    BinaryOperator op;
 } CBinaryExpression;
 
 typedef struct {

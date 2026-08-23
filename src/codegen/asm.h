@@ -60,7 +60,7 @@ typedef struct {
 
 // PROGRAM
 typedef struct {
-    char* name;
+    const char* name;
     AsmInstructions instructions;
     size_t stack_size; // used to generate stack setup and cleanup
 } AsmFunctionDefinition;

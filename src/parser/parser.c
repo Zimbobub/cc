@@ -27,10 +27,52 @@ void expect_keyword(TokenBuf tokens, size_t* i, const char* keyword) {
     }
 }
 
+CExpression parse_factor(TokenBuf tokens, size_t* i); // decl for circular recursive calls
 
-
+// unary expressions have highest precedence, and are parsed differently
+// they they are put in their own parsing function
+// <exp> ::= <factor> | <exp> <binop> <exp>
 CExpression parse_expression(TokenBuf tokens, size_t* i) {
     printf("parse expression\n");
+
+    CExpression expr = parse_factor(tokens, i);
+    TokenType next = tokens.tokens[*i].type;
+
+    while (next == Plus || next == Minus) {
+        BinaryOperator op;
+        if (next == Plus) op = OPERATOR_ADD;
+        else if (next == Minus) op = OPERATOR_SUB;
+        else parser_error(&tokens, i, "unknown binary operator");
+        (*i)++;
+
+        // copy prev loop's expr into left
+        CExpression* left = malloc(sizeof(CExpression));
+        if (left == NULL) parser_error(&tokens, i, "malloc failed");
+        memcpy(left, &expr, sizeof(CExpression));
+
+        // parse right (will always be a factor for now)
+        CExpression* right = malloc(sizeof(CExpression));
+        if (right == NULL) parser_error(&tokens, i, "malloc failed");
+        *right = parse_factor(tokens, i);
+
+        expr = (CExpression) {
+            .type=EXPRESSION_BINARY,
+            .expr.binary= {
+                .left=left,
+                .op=op,
+                .right=right
+            }
+        };
+
+        next = tokens.tokens[*i].type;
+    }
+
+    return expr;
+}
+
+// <factor> ::= <int> | <unop> <factor> | "(" <exp> ")"
+CExpression parse_factor(TokenBuf tokens, size_t* i) {
+    printf("parse factor\n");
     TokenType next = tokens.tokens[*i].type;
     if (next == Number) {
         // constant
@@ -43,7 +85,7 @@ CExpression parse_expression(TokenBuf tokens, size_t* i) {
     } else if (next == LParen) {
         // expr in parentheses
         expect_token(tokens, i, LParen);
-        CExpression expr = parse_expression(tokens, i);
+        CExpression expr = parse_factor(tokens, i);
         expect_token(tokens, i, RParen);
         return expr;
     } else if (next == Tilde || next == Minus) {
