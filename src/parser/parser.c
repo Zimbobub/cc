@@ -27,33 +27,70 @@ void expect_keyword(TokenBuf tokens, size_t* i, const char* keyword) {
     }
 }
 
+UnaryOperator expect_unary_operator(TokenBuf tokens, size_t* i) {
+    if (tokens.tokens[(*i)].type == Tilde) {
+        expect_token(tokens, i, Tilde);
+        return OPERATOR_BITWISE_COMPLEMENT;
+    } else if (tokens.tokens[(*i)].type == Minus) {
+        expect_token(tokens, i, Minus);
+        return OPERATOR_NEGATE;
+    }
+}
+
+BinaryOperator expect_binary_operator(TokenBuf tokens, size_t* i) {
+    (*i)++;
+
+    if (tokens.tokens[(*i)-1].type == Plus) return OPERATOR_ADD;
+    else if (tokens.tokens[(*i)-1].type == Minus) return OPERATOR_SUB;
+    else if (tokens.tokens[(*i)-1].type == Asterisk) return OPERATOR_MUL;
+    else if (tokens.tokens[(*i)-1].type == ForwardSlash) return OPERATOR_DIV;
+    else if (tokens.tokens[(*i)-1].type == Percent) return OPERATOR_MOD;
+    else parser_error(&tokens, i, "Expected binary operator, got %s", get_token_name(tokens.tokens[*i].type));
+}
+
+
+Precedence precedence(TokenType token) {
+    switch (token) {
+        case Plus:
+        case Minus:
+            return PRECEDENCE_ADD;
+
+        case Asterisk:
+        case ForwardSlash:
+        case Percent:
+            return PRECEDENCE_MUL;
+        
+        default:
+            return PRECEDENCE_UNKNOWN;
+    }
+}
+
+
 CExpression parse_factor(TokenBuf tokens, size_t* i); // decl for circular recursive calls
 
 // unary expressions have highest precedence, and are parsed differently
 // they they are put in their own parsing function
 // <exp> ::= <factor> | <exp> <binop> <exp>
-CExpression parse_expression(TokenBuf tokens, size_t* i) {
+CExpression parse_expression(TokenBuf tokens, size_t* i, Precedence min_precedence) {
     printf("parse expression\n");
 
     CExpression expr = parse_factor(tokens, i);
-    TokenType next = tokens.tokens[*i].type;
 
-    while (next == Plus || next == Minus) {
-        BinaryOperator op;
-        if (next == Plus) op = OPERATOR_ADD;
-        else if (next == Minus) op = OPERATOR_SUB;
-        else parser_error(&tokens, i, "unknown binary operator");
-        (*i)++;
+    // non-operator tokens have a precedence of 0, so the loop will end at end of expr
+    while (precedence(tokens.tokens[*i].type) >= min_precedence) {
+        Precedence prec = precedence(tokens.tokens[*i].type);
+
+        BinaryOperator op = expect_binary_operator(tokens, i);
 
         // copy prev loop's expr into left
         CExpression* left = malloc(sizeof(CExpression));
         if (left == NULL) parser_error(&tokens, i, "malloc failed");
         memcpy(left, &expr, sizeof(CExpression));
 
-        // parse right (will always be a factor for now)
+        // parse right (
         CExpression* right = malloc(sizeof(CExpression));
         if (right == NULL) parser_error(&tokens, i, "malloc failed");
-        *right = parse_factor(tokens, i);
+        *right = parse_expression(tokens, i, prec + 1); // right hand side can only have operators with higher precedence than this one
 
         expr = (CExpression) {
             .type=EXPRESSION_BINARY,
@@ -63,8 +100,6 @@ CExpression parse_expression(TokenBuf tokens, size_t* i) {
                 .right=right
             }
         };
-
-        next = tokens.tokens[*i].type;
     }
 
     return expr;
@@ -85,23 +120,15 @@ CExpression parse_factor(TokenBuf tokens, size_t* i) {
     } else if (next == LParen) {
         // expr in parentheses
         expect_token(tokens, i, LParen);
-        CExpression expr = parse_factor(tokens, i);
+        CExpression expr = parse_expression(tokens, i, 1);
         expect_token(tokens, i, RParen);
         return expr;
     } else if (next == Tilde || next == Minus) {
-        // unary operator
-        UnaryOperator op = OPERATOR_BITWISE_COMPLEMENT;
-        if (next == Tilde) {
-            expect_token(tokens, i, Tilde);
-            op = OPERATOR_BITWISE_COMPLEMENT;
-        } else if (next == Minus) {
-            expect_token(tokens, i, Minus);
-            op = OPERATOR_SUB;
-        }
+        UnaryOperator op = expect_unary_operator(tokens, i);
 
         CExpression* inner = malloc(sizeof(CExpression));
         if (inner == NULL) parser_error(&tokens, i, "malloc failed");
-        *inner = parse_expression(tokens, i);
+        *inner = parse_factor(tokens, i);
         CExpression expr = {
             EXPRESSION_UNARY,
             .expr.unary = {
@@ -118,7 +145,7 @@ CExpression parse_factor(TokenBuf tokens, size_t* i) {
 CStatement parse_statement(TokenBuf tokens, size_t* i) {
     printf("parse statement\n");
     expect_keyword(tokens, i, "return");
-    CExpression expr = parse_expression(tokens, i);
+    CExpression expr = parse_expression(tokens, i, 1);
     expect_token(tokens, i, Semicolon);
     CStatement statement = {
         .type=STATEMENT_RETURN,
