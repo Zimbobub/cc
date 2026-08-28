@@ -19,6 +19,14 @@ void print_IR_instruction(IRInstruction* instr, int depth) {
         printf(" = %c", instr->inner.unary.op); // op reprs char
         print_IR_value(&instr->inner.unary.src);
         printf("\n");
+    } else if (instr->type == IR_INSTRUCTION_BINARY) {
+        printf("%*c", depth, ' ');
+        print_IR_value(&instr->inner.binary.dst);
+        printf(" = ");
+        print_IR_value(&instr->inner.binary.left);
+        printf(" %c ", instr->inner.binary.op); // op reprs char
+        print_IR_value(&instr->inner.binary.right);
+        printf("\n");
     }
 }
 
@@ -94,7 +102,33 @@ IRValue IR_transform_expr(CExpression ast, IRInstructions* instructions) {
             .inner.var.identifier=dst
         };
     } else if (ast.type == EXPRESSION_BINARY) {
-        throw_IR_err("TODO");
+        IRValue left = IR_transform_expr(*ast.expr.binary.left, instructions);
+        IRValue right = IR_transform_expr(*ast.expr.binary.right, instructions);
+
+        const char* dst = make_temp_ident();
+
+        instructions->inner = realloc(instructions->inner, instructions->size*sizeof(IRInstruction) + sizeof(IRInstruction));
+        if (instructions->inner == NULL) throw_IR_err("malloc failed");
+
+        instructions->inner[instructions->size] = (IRInstruction){
+            .type=IR_INSTRUCTION_BINARY,
+            .inner.binary = {
+                .op=ast.expr.binary.op,
+                .left=left,
+                .right=right,
+                .dst = {
+                    .type=IR_VALUE_VARIABLE,
+                    .inner.var.identifier=dst
+                },
+            }
+        };
+
+        instructions->size++;
+
+        return (IRValue) {
+            .type=IR_VALUE_VARIABLE,
+            .inner.var.identifier=dst
+        };
     } else {
         throw_IR_err("unknown expr type");
     }

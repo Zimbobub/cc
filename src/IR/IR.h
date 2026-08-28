@@ -28,6 +28,7 @@ typedef struct {
 typedef enum {
     IR_INSTRUCTION_RETURN,
     IR_INSTRUCTION_UNARY,
+    IR_INSTRUCTION_BINARY,
 } IRInstructionType;
 
 typedef struct {
@@ -41,6 +42,12 @@ typedef struct {
             IRValue src;
             IRValue dst;
         } unary;
+        struct {
+            BinaryOperator op;
+            IRValue left;
+            IRValue right;
+            IRValue dst;
+        } binary;
     } inner;
 } IRInstruction;
 
