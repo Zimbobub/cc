@@ -62,3 +62,55 @@ void print_asm_program(AsmProgram* program) {
     print_asm_function_definition(&program->function_definition, 2);
     printf("}\n");
 }
+
+
+
+
+
+AsmOperand AsmOperand_imm(int val) {
+    return (AsmOperand) {
+        .type=OPERAND_IMMEDIATE,
+        .inner.immediate=val
+    };
+}
+
+AsmOperand AsmOperand_reg(AsmRegister reg) {
+    return (AsmOperand) {
+        .type=OPERAND_REGISTER,
+        .inner.reg=reg
+    };
+}
+
+AsmOperand AsmOperand_pseudo(const char* name) {
+    return (AsmOperand) {
+        .type=OPERAND_PSEUDO,
+        .inner.pseudo=strdup(name)
+    };
+}
+AsmOperand AsmOperand_stack(size_t offset) {
+    return (AsmOperand) {
+        .type=OPERAND_STACK_OFFSET,
+        .inner.stack_offset=offset
+    };
+}
+
+
+
+void AsmInstructions_push(AsmInstructions* instructions, AsmInstruction instr) {
+    instructions->size += 1;
+    instructions->inner = realloc(instructions->inner, instructions->size * sizeof(AsmInstruction));
+    if (instructions->inner == NULL) throw_asm_fixup_err("realloc failed");
+
+    memcpy(&instructions->inner[instructions->size-1], &instr, sizeof(AsmInstruction));
+}
+
+void AsmInstructions_append(AsmInstructions* instructions, AsmInstructions other) {
+    size_t old_size = instructions->size;
+    instructions->size += other.size;
+    instructions->inner = realloc(instructions->inner, instructions->size * sizeof(AsmInstruction));
+    if (instructions->inner == NULL) throw_asm_fixup_err("realloc failed");
+
+    for (size_t i = 0; i < other.size; i++) {
+        memcpy(&instructions->inner[old_size + i], &other.inner[i], sizeof(AsmInstruction));
+    }
+}

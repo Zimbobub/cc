@@ -50,37 +50,51 @@ void throw_asm_fixup_err(const char* msg) {
 
 void fixup_mov(AsmInstruction instr, AsmInstructions* fixed_instructions) {
     if (instr.type != INSTRUCTION_MOV) throw_asm_fixup_err("fixup_mov() called on non-mov instruction");
-
     if (instr.inner.mov.dst.type == OPERAND_IMMEDIATE) throw_asm_fixup_err("mov dst is an immediate");
 
     if (instr.inner.mov.src.type == OPERAND_STACK_OFFSET && instr.inner.mov.dst.type == OPERAND_STACK_OFFSET) {
-        fixed_instructions->size += 2;
-        fixed_instructions->inner = realloc(fixed_instructions->inner, fixed_instructions->size * sizeof(AsmInstruction));
-        if (fixed_instructions->inner == NULL) throw_asm_fixup_err("realloc failed");
+        AsmInstructions_push(fixed_instructions, (AsmInstruction){
+            .type=INSTRUCTION_MOV,
+            .inner.mov={
+                .src=instr.inner.mov.src,
+                .dst=AsmOperand_reg(REGISTER_R10)
+            }
+        });
 
-        // copy original instruction twice
-        memcpy(&fixed_instructions->inner[fixed_instructions->size-2], &instr, sizeof(AsmInstruction));
-        memcpy(&fixed_instructions->inner[fixed_instructions->size-1], &instr, sizeof(AsmInstruction));
-
-        // then add an intermediary register
-        fixed_instructions->inner[fixed_instructions->size-2].inner.mov.dst = (AsmOperand) {
-            .type=OPERAND_REGISTER,
-            .inner.reg=REGISTER_R10
-        };
-
-        fixed_instructions->inner[fixed_instructions->size-1].inner.mov.src = (AsmOperand) {
-            .type=OPERAND_REGISTER,
-            .inner.reg=REGISTER_R10
-        };
+        AsmInstructions_push(fixed_instructions, (AsmInstruction){
+            .type=INSTRUCTION_MOV,
+            .inner.mov={
+                .src=AsmOperand_reg(REGISTER_R10),
+                .dst=instr.inner.mov.dst
+            }
+        });
+    } else {
+        // no problem detected
+        AsmInstructions_push(fixed_instructions, instr);
     }
+}
 
-    // no problem detected
-    fixed_instructions->size += 1;
-    fixed_instructions->inner = realloc(fixed_instructions->inner, fixed_instructions->size * sizeof(AsmInstruction));
-    if (fixed_instructions->inner == NULL) throw_asm_fixup_err("realloc failed");
 
-    // copy original instruction
-    memcpy(&fixed_instructions->inner[fixed_instructions->size-1], &instr, sizeof(AsmInstruction));
+// TODO FINISH
+void fixup_add_sub(AsmInstruction instr, AsmInstructions* fixed_instructions) {
+    if (instr.type != INSTRUCTION_BINARY) throw_asm_fixup_err("fixup_binary() called on non-binary instruction");
+    if (instr.inner.binary.dst.type == OPERAND_IMMEDIATE) throw_asm_fixup_err("operation dst is an immediate");
+
+    if (instr.inner.binary.src.type == OPERAND_STACK_OFFSET && instr.inner.binary.dst.type == OPERAND_STACK_OFFSET) {
+        AsmInstructions_push(fixed_instructions, (AsmInstruction){
+            .type=INSTRUCTION_MOV,
+            .inner.mov={
+                .src=instr.inner.binary.src,
+                .dst=AsmOperand_reg(REGISTER_R10)
+            }
+        });
+
+        instr.inner.binary.src = AsmOperand_reg(REGISTER_R10);
+        AsmInstructions_push(fixed_instructions, instr);
+    } else {
+        // no problem detected
+        AsmInstructions_push(fixed_instructions, instr);
+    }
 }
 
 
@@ -90,45 +104,12 @@ void fixup_imul(AsmInstruction instr, AsmInstructions* fixed_instructions) {
 }
 
 
-// TODO FINISH
-void fixup_add_sub(AsmInstruction instr, AsmInstructions* fixed_instructions) {
-    if (instr.type != INSTRUCTION_BINARY) throw_asm_fixup_err("fixup_binary() called on non-binary instruction");
-
-    if (instr.inner.binary.dst.type == OPERAND_IMMEDIATE) throw_asm_fixup_err("operation dst is an immediate");
-
-    if (instr.inner.binary.src.type == OPERAND_STACK_OFFSET && instr.inner.binary.dst.type == OPERAND_STACK_OFFSET) {
-        fixed_instructions->size += 2;
-        fixed_instructions->inner = realloc(fixed_instructions->inner, fixed_instructions->size * sizeof(AsmInstruction));
-        if (fixed_instructions->inner == NULL) throw_asm_fixup_err("realloc failed");
-
-        // copy original instruction twice
-        memcpy(&fixed_instructions->inner[fixed_instructions->size-2], &instr, sizeof(AsmInstruction));
-        memcpy(&fixed_instructions->inner[fixed_instructions->size-1], &instr, sizeof(AsmInstruction));
-
-        // then add an intermediary register
-        fixed_instructions->inner[fixed_instructions->size-2].inner.mov.dst = (AsmOperand) {
-            .type=OPERAND_REGISTER,
-            .inner.reg=REGISTER_R10
-        };
-
-        fixed_instructions->inner[fixed_instructions->size-1].inner.mov.src = (AsmOperand) {
-            .type=OPERAND_REGISTER,
-            .inner.reg=REGISTER_R10
-        };
-    }
-
-    // no problem detected
-    fixed_instructions->size += 1;
-    fixed_instructions->inner = realloc(fixed_instructions->inner, fixed_instructions->size * sizeof(AsmInstruction));
-    if (fixed_instructions->inner == NULL) throw_asm_fixup_err("realloc failed");
-
-    // copy original instruction
-    memcpy(&fixed_instructions->inner[fixed_instructions->size-1], &instr, sizeof(AsmInstruction));
-}
-
-
 void fixup_instruction(AsmInstruction instr, AsmInstructions* fixed_instructions) {
     if (instr.type == INSTRUCTION_MOV) fixup_mov(instr, fixed_instructions);
+    if (instr.type == INSTRUCTION_BINARY) {
+        if (instr.inner.binary.op == OPERATOR_MUL) fixup_imul(instr, fixed_instructions);
+        else fixup_add_sub(instr, fixed_instructions);
+    }
 }
 
 

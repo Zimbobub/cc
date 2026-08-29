@@ -2,6 +2,7 @@
 #define ASM_H
 
 #include <stddef.h>
+#include <string.h>
 
 #include "../parser/ast.h"
 
@@ -87,5 +88,12 @@ void print_asm_instruction(AsmInstruction* instr, int depth);
 void print_asm_function_definition(AsmFunctionDefinition* func, int depth);
 void print_asm_program(AsmProgram* program);
 
+AsmOperand AsmOperand_imm(int val);
+AsmOperand AsmOperand_reg(AsmRegister reg);
+AsmOperand AsmOperand_pseudo(const char* name);
+AsmOperand AsmOperand_stack(size_t offset);
+
+void AsmInstructions_push(AsmInstructions* instructions, AsmInstruction instr);
+void AsmInstructions_append(AsmInstructions* instructions, AsmInstructions other);
 
 #endif
