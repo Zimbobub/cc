@@ -9,7 +9,7 @@ void throw_asm_fixup_err(const char* msg) {
 }
 
 
-
+// Fix move from memory to memory
 void fixup_mov(AsmInstruction instr, AsmInstructions* fixed_instructions) {
     if (instr.type != INSTRUCTION_MOV) throw_asm_fixup_err("fixup_mov() called on non-mov instruction");
     if (instr.inner.mov.dst.type == OPERAND_IMMEDIATE) throw_asm_fixup_err("mov dst is an immediate");
@@ -17,18 +17,14 @@ void fixup_mov(AsmInstruction instr, AsmInstructions* fixed_instructions) {
     if (instr.inner.mov.src.type == OPERAND_STACK_OFFSET && instr.inner.mov.dst.type == OPERAND_STACK_OFFSET) {
         AsmInstructions_push(fixed_instructions, (AsmInstruction){
             .type=INSTRUCTION_MOV,
-            .inner.mov={
-                .src=instr.inner.mov.src,
-                .dst=AsmOperand_reg(REGISTER_R10)
-            }
+            .inner.mov.src=instr.inner.mov.src,
+            .inner.mov.dst=AsmOperand_reg(REGISTER_R10)
         });
 
         AsmInstructions_push(fixed_instructions, (AsmInstruction){
             .type=INSTRUCTION_MOV,
-            .inner.mov={
-                .src=AsmOperand_reg(REGISTER_R10),
-                .dst=instr.inner.mov.dst
-            }
+            .inner.mov.src=AsmOperand_reg(REGISTER_R10),
+            .inner.mov.dst=instr.inner.mov.dst
         });
     } else {
         // no problem detected
@@ -37,18 +33,17 @@ void fixup_mov(AsmInstruction instr, AsmInstructions* fixed_instructions) {
 }
 
 
-// TODO FINISH
+// fix add or sub memory to memory
 void fixup_add_sub(AsmInstruction instr, AsmInstructions* fixed_instructions) {
-    if (instr.type != INSTRUCTION_BINARY) throw_asm_fixup_err("fixup_binary() called on non-binary instruction");
+    if (instr.type != INSTRUCTION_BINARY) throw_asm_fixup_err("fixup_add_sub() called on non-binary instruction");
+    if (instr.inner.binary.op != OPERATOR_ADD && instr.inner.binary.op != OPERATOR_SUB) throw_asm_fixup_err("fixup_add_sub() called on binop that isnt add or sub");
     if (instr.inner.binary.dst.type == OPERAND_IMMEDIATE) throw_asm_fixup_err("operation dst is an immediate");
 
     if (instr.inner.binary.src.type == OPERAND_STACK_OFFSET && instr.inner.binary.dst.type == OPERAND_STACK_OFFSET) {
         AsmInstructions_push(fixed_instructions, (AsmInstruction){
             .type=INSTRUCTION_MOV,
-            .inner.mov={
-                .src=instr.inner.binary.src,
-                .dst=AsmOperand_reg(REGISTER_R10)
-            }
+            .inner.mov.src=instr.inner.binary.src,
+            .inner.mov.dst=AsmOperand_reg(REGISTER_R10)
         });
 
         instr.inner.binary.src = AsmOperand_reg(REGISTER_R10);
@@ -62,7 +57,57 @@ void fixup_add_sub(AsmInstruction instr, AsmInstructions* fixed_instructions) {
 
 // imul cant have a memory address as its dst
 void fixup_imul(AsmInstruction instr, AsmInstructions* fixed_instructions) {
-    // TODO
+    if (instr.type != INSTRUCTION_BINARY) throw_asm_fixup_err("fixup_imul() called on non-binary instruction");
+    if (instr.inner.binary.op != OPERATOR_MUL) throw_asm_fixup_err("fixup_imul() called on binop that isnt mul");
+    if (instr.inner.binary.dst.type == OPERAND_IMMEDIATE) throw_asm_fixup_err("operation dst is an immediate");
+
+    if (instr.inner.binary.dst.type == OPERAND_STACK_OFFSET) {
+        // imul src, dst (dst *= src), where dst is a memory addr
+        // becomes
+        // mov dst to r11
+        // imul src r11
+        // mov r11 to dst
+
+        // mov dst to r11
+        AsmInstructions_push(fixed_instructions, (AsmInstruction){
+            .type=INSTRUCTION_MOV,
+            .inner.mov.src=instr.inner.binary.dst,
+            .inner.mov.dst=AsmOperand_reg(REGISTER_R11)
+        });
+
+        // imul src r11
+        instr.inner.binary.dst = AsmOperand_reg(REGISTER_R11);
+        AsmInstructions_push(fixed_instructions, instr);
+
+        // mov r11 to dst
+        AsmInstructions_push(fixed_instructions, (AsmInstruction){
+            .type=INSTRUCTION_MOV,
+            .inner.mov.src=instr.inner.binary.dst,
+            .inner.mov.dst=AsmOperand_reg(REGISTER_R11)
+        });
+    } else {
+        // no problem detected
+        AsmInstructions_push(fixed_instructions, instr);
+    }
+}
+
+// idiv cant be called using an immediate
+void fixup_idiv(AsmInstruction instr, AsmInstructions* fixed_instructions) {
+    if (instr.type != INSTRUCTION_IDIV) throw_asm_fixup_err("fixup_idiv() called on non-idiv instruction");
+
+    if (instr.inner.idiv.type == OPERAND_IMMEDIATE) {
+        AsmInstructions_push(fixed_instructions, (AsmInstruction){
+            .type=INSTRUCTION_MOV,
+            .inner.mov.src=instr.inner.idiv,
+            .inner.mov.dst=AsmOperand_reg(REGISTER_R10)
+        });
+
+        instr.inner.idiv = AsmOperand_reg(REGISTER_R10);
+        AsmInstructions_push(fixed_instructions, instr);
+    } else {
+        // no problem detected
+        AsmInstructions_push(fixed_instructions, instr);
+    }
 }
 
 

@@ -2,6 +2,7 @@
 #define ASM_H
 
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "../parser/ast.h"

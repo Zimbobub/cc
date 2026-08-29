@@ -84,7 +84,7 @@ AsmOperand AsmOperand_reg(AsmRegister reg) {
 AsmOperand AsmOperand_pseudo(const char* name) {
     return (AsmOperand) {
         .type=OPERAND_PSEUDO,
-        .inner.pseudo=strdup(name)
+        .inner.pseudo=name // can refer to same name since theyre both consts. TODO: change to reference to a symbol table
     };
 }
 AsmOperand AsmOperand_stack(size_t offset) {
@@ -99,7 +99,10 @@ AsmOperand AsmOperand_stack(size_t offset) {
 void AsmInstructions_push(AsmInstructions* instructions, AsmInstruction instr) {
     instructions->size += 1;
     instructions->inner = realloc(instructions->inner, instructions->size * sizeof(AsmInstruction));
-    if (instructions->inner == NULL) throw_asm_fixup_err("realloc failed");
+    if (instructions->inner == NULL) {
+        fprintf(stderr, "realloc failed");
+        exit(EXIT_FAILURE);
+    }
 
     memcpy(&instructions->inner[instructions->size-1], &instr, sizeof(AsmInstruction));
 }
@@ -108,7 +111,10 @@ AsmInstructions* AsmInstructions_append(AsmInstructions* instructions, AsmInstru
     size_t old_size = instructions->size;
     instructions->size += other->size;
     instructions->inner = realloc(instructions->inner, instructions->size * sizeof(AsmInstruction));
-    if (instructions->inner == NULL) throw_asm_fixup_err("realloc failed");
+    if (instructions->inner == NULL) {
+        fprintf(stderr, "realloc failed");
+        exit(EXIT_FAILURE);
+    }
 
     for (size_t i = 0; i < other->size; i++) {
         memcpy(&instructions->inner[old_size + i], &other->inner[i], sizeof(AsmInstruction));
