@@ -21,8 +21,9 @@ set(SOURCES
     src/parser/ast.c
     src/IR/IR.c
     src/codegen/codegen.c
-    src/codegen/asm_cleanup.c
     src/codegen/asm.c
+    src/codegen/replace_pseudo_regs.c
+    src/codegen/fixup_instructions.c
     src/code_emission/emission.c
 )
 

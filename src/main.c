@@ -8,7 +8,8 @@
 #include "parser/parser.h"
 #include "IR/IR.h"
 #include "codegen/codegen.h"
-#include "codegen/asm_cleanup.h"
+#include "codegen/replace_pseudo_regs.h"
+#include "codegen/fixup_instructions.h"
 #include "code_emission/emission.h"
 
 typedef enum {
