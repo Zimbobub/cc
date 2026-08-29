@@ -5,7 +5,9 @@ void print_asm_operand(AsmOperand* op) {
         printf("%d", op->inner.immediate);
     } else if (op->type == OPERAND_REGISTER) {
         if (op->inner.reg == REGISTER_RAX) printf("RAX");
+        else if (op->inner.reg == REGISTER_RDX) printf("RDX");
         else if (op->inner.reg == REGISTER_R10) printf("R10");
+        else if (op->inner.reg == REGISTER_R11) printf("R11");
         else printf("?REG?");
     } else if (op->type == OPERAND_PSEUDO) {
         printf("var(%s)", op->inner.pseudo);
@@ -25,16 +27,27 @@ void print_asm_instruction(AsmInstruction* instr, int depth) {
         print_asm_operand(&instr->inner.mov.dst);
         printf(")\n");
 
-    } else if (instr->type == INSTRUCTION_RET) {
-        printf("%*cret\n", depth, ' ');
     } else if (instr->type == INSTRUCTION_UNARY) {
         printf("%*c%c", depth, ' ', instr->inner.unary.op);
         print_asm_operand(&instr->inner.unary.operand);
         printf("\n");
+    } else if (instr->type == INSTRUCTION_BINARY) {
+        printf("%*c", depth, ' ');
+        print_asm_operand(&instr->inner.binary.dst);
+        printf("%c=", instr->inner.binary.op);
+        print_asm_operand(&instr->inner.binary.src);
+        printf("\n");
+    } else if (instr->type == INSTRUCTION_IDIV) {
+        printf("%*cidiv ", depth, ' ');
+        print_asm_operand(&instr->inner.idiv);
+        printf("\n");
+    } else if (instr->type == INSTRUCTION_CDQ) {
+        printf("%*ccdq\n", depth, ' ');
+    } else if (instr->type == INSTRUCTION_RET) {
+        printf("%*cret\n", depth, ' ');
     } else {
         printf("%*cUnknown instruction\n", depth, ' ');
     }
-    // printf("%*c}\n", depth, ' ');
 }
 
 void print_asm_function_definition(AsmFunctionDefinition* func, int depth) {

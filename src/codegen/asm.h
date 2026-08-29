@@ -15,7 +15,9 @@ typedef enum {
 
 typedef enum {
     REGISTER_RAX,
-    REGISTER_R10
+    REGISTER_RDX,
+    REGISTER_R10,
+    REGISTER_R11,
 } AsmRegister;
 
 typedef struct {
@@ -33,7 +35,10 @@ typedef struct {
 // INSTRUCTION
 typedef enum {
     INSTRUCTION_MOV,
-    INSTRUCTION_UNARY,
+    INSTRUCTION_UNARY,  // negate / complement
+    INSTRUCTION_BINARY, // add / sub / imul
+    INSTRUCTION_IDIV,   // idivl x: EAX = (EDX EAX) / x; EDX = (EDX EAX) % x;
+    INSTRUCTION_CDQ,    // sign extend EAX into EDX
     INSTRUCTION_RET
 } AsmInstructionType;
 
@@ -48,6 +53,12 @@ typedef struct {
             UnaryOperator op;
             AsmOperand operand;
         } unary;
+        struct {
+            BinaryOperator op;
+            AsmOperand src;
+            AsmOperand dst;
+        } binary;
+        AsmOperand idiv;
     } inner;
 } AsmInstruction;
 

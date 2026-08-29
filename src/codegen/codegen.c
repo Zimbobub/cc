@@ -75,6 +75,88 @@ AsmInstructions transform_instruction(IRInstruction ir) {
             }
         };
         return instructions;
+    } else if (ir.type == IR_INSTRUCTION_BINARY) {
+        if (ir.inner.binary.op == OPERATOR_ADD || ir.inner.binary.op == OPERATOR_SUB || ir.inner.binary.op == OPERATOR_MUL) {
+            // dst = left + right
+            // becomes
+            // dst = left
+            // dst += right
+            AsmInstructions instructions = {
+                .instructions=malloc(2*sizeof(AsmInstruction)),
+                .size=2
+            };
+            if (instructions.instructions == NULL) throw_codegen_err("Malloc failed");
+    
+            // mov src to dst
+            instructions.instructions[0] = (AsmInstruction) {
+                .type=INSTRUCTION_MOV,
+                .inner.mov={
+                    .src=transform_operand(ir.inner.binary.left),
+                    .dst=transform_operand(ir.inner.binary.dst)
+                }
+            };
+    
+            // operate on dst
+            instructions.instructions[1] = (AsmInstruction) {
+                .type=INSTRUCTION_BINARY,
+                .inner.binary={
+                    .op=ir.inner.binary.op,
+                    .src=transform_operand(ir.inner.binary.right),
+                    .dst=transform_operand(ir.inner.binary.dst)
+                }
+            };
+            return instructions;
+        } else if (ir.inner.binary.op == OPERATOR_DIV || ir.inner.binary.op == OPERATOR_MOD) {
+            // dst = left / right
+            // becomes
+            // EAX = left
+            // EDX = sign_extend(EAX)
+            // idiv right
+            // dst = EAX (or for mod, dst = EDX)
+            AsmInstructions instructions = {
+                .instructions=malloc(4*sizeof(AsmInstruction)),
+                .size=2
+            };
+            if (instructions.instructions == NULL) throw_codegen_err("Malloc failed");
+    
+            // EAX = left
+            instructions.instructions[0] = (AsmInstruction) {
+                .type=INSTRUCTION_MOV,
+                .inner.mov={
+                    .src=transform_operand(ir.inner.binary.left),
+                    .dst={
+                        .type=OPERAND_REGISTER,
+                        .inner.reg=REGISTER_RAX
+                    }
+                }
+            };
+    
+            // EDX = sign_extend(EAX)
+            instructions.instructions[1] = (AsmInstruction) {
+                .type=INSTRUCTION_CDQ,
+            };
+
+            // idiv right
+            instructions.instructions[2] = (AsmInstruction) {
+                .type=INSTRUCTION_IDIV,
+                .inner.idiv=transform_operand(ir.inner.binary.right)
+            };
+
+            // dst = EAX (for div) | EDX (for mod)
+            instructions.instructions[3] = (AsmInstruction) {
+                .type=INSTRUCTION_MOV,
+                .inner.mov={
+                    .src={
+                        .type=OPERAND_REGISTER,
+                        .inner.reg=(ir.inner.binary.op == OPERATOR_DIV ? REGISTER_RAX : REGISTER_RDX)
+                    },
+                    .dst=transform_operand(ir.inner.binary.dst)
+                }
+            };
+            return instructions;
+        } else {
+            throw_codegen_err("unknown binary operand");
+        }
     } else {
         throw_codegen_err("unknown IRInstruction type");
     }
