@@ -50,8 +50,25 @@ void emit_asm_instruction(String* output, AsmInstruction* instr) {
 
         emit_asm_operand(output, &instr->inner.unary.operand);
         String_push(output, "\n");
+    } else if (instr->type == INSTRUCTION_BINARY) {
+        if (instr->inner.binary.op == OPERATOR_ADD) String_push(output, "    addl ");
+        else if (instr->inner.binary.op == OPERATOR_SUB) String_push(output, "    subl ");
+        else if (instr->inner.binary.op == OPERATOR_MUL) String_push(output, "    imull ");
+        else throw_code_emission_err("unknown binary operator type");
+
+        emit_asm_operand(output, &instr->inner.binary.src);
+        String_push(output, ", ");
+        emit_asm_operand(output, &instr->inner.binary.dst);
+        String_push(output, "\n");
+    } else if (instr->type == INSTRUCTION_IDIV) {
+        String_push(output, "    idivl ");
+
+        emit_asm_operand(output, &instr->inner.idiv);
+        String_push(output, "\n");
+    } else if (instr->type == INSTRUCTION_CDQ) {
+        String_push(output, "    cdq\n");
     } else if (instr->type == INSTRUCTION_RET) {
-        String_push(output, "    movq %rbp, %rsp\n    popq %rbp\n    ret\n");
+        String_push(output, "\n    movq %rbp, %rsp\n    popq %rbp\n    ret\n");
     } else {
         throw_code_emission_err("unknown instruction type");
     }
@@ -82,8 +99,8 @@ void emit_asm_function_definition(String* output, AsmFunctionDefinition* func) {
 char* emit_asm_program(AsmProgram* program) {
     String output = String_new(4096);
 
-    String_push(&output, ".section .note.GNU-stack,\"\",@progbits\n");
     emit_asm_function_definition(&output, &program->function_definition);
+    String_push(&output, "\n.section .note.GNU-stack,\"\",@progbits\n");
 
     return output.ptr;
 }

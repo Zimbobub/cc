@@ -76,14 +76,18 @@ void fixup_imul(AsmInstruction instr, AsmInstructions* fixed_instructions) {
         });
 
         // imul src r11
-        instr.inner.binary.dst = AsmOperand_reg(REGISTER_R11);
-        AsmInstructions_push(fixed_instructions, instr);
+        AsmInstructions_push(fixed_instructions, (AsmInstruction){
+            .type=INSTRUCTION_BINARY,
+            .inner.binary.op=OPERATOR_MUL,
+            .inner.binary.src=instr.inner.binary.src,
+            .inner.binary.dst=AsmOperand_reg(REGISTER_R11)
+        });
 
         // mov r11 to dst
         AsmInstructions_push(fixed_instructions, (AsmInstruction){
             .type=INSTRUCTION_MOV,
-            .inner.mov.src=instr.inner.binary.dst,
-            .inner.mov.dst=AsmOperand_reg(REGISTER_R11)
+            .inner.mov.src=AsmOperand_reg(REGISTER_R11),
+            .inner.mov.dst=instr.inner.binary.dst
         });
     } else {
         // no problem detected
@@ -102,8 +106,10 @@ void fixup_idiv(AsmInstruction instr, AsmInstructions* fixed_instructions) {
             .inner.mov.dst=AsmOperand_reg(REGISTER_R10)
         });
 
-        instr.inner.idiv = AsmOperand_reg(REGISTER_R10);
-        AsmInstructions_push(fixed_instructions, instr);
+        AsmInstructions_push(fixed_instructions, (AsmInstruction){
+            .type=INSTRUCTION_IDIV,
+            .inner.idiv=AsmOperand_reg(REGISTER_R10)
+        });
     } else {
         // no problem detected
         AsmInstructions_push(fixed_instructions, instr);
@@ -113,9 +119,12 @@ void fixup_idiv(AsmInstruction instr, AsmInstructions* fixed_instructions) {
 
 void fixup_instruction(AsmInstruction instr, AsmInstructions* fixed_instructions) {
     if (instr.type == INSTRUCTION_MOV) fixup_mov(instr, fixed_instructions);
-    if (instr.type == INSTRUCTION_BINARY) {
+    else if (instr.type == INSTRUCTION_BINARY) {
         if (instr.inner.binary.op == OPERATOR_MUL) fixup_imul(instr, fixed_instructions);
         else fixup_add_sub(instr, fixed_instructions);
+    } else if (instr.type == INSTRUCTION_IDIV) fixup_idiv(instr, fixed_instructions);
+    else {
+        AsmInstructions_push(fixed_instructions, instr);
     }
 }
 
