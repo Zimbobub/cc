@@ -28,13 +28,13 @@ AsmOperand transform_operand(IRValue ir) {
 AsmInstructions transform_instruction(IRInstruction ir) {
     if (ir.type == IR_INSTRUCTION_RETURN) {
         AsmInstructions instructions = {
-            .instructions=malloc(2*sizeof(AsmInstruction)),
+            .inner=malloc(2*sizeof(AsmInstruction)),
             .size=2
         };
-        if (instructions.instructions == NULL) throw_codegen_err("Malloc failed");
+        if (instructions.inner == NULL) throw_codegen_err("Malloc failed");
 
         // mov <val> to RAX
-        instructions.instructions[0] = (AsmInstruction) {
+        instructions.inner[0] = (AsmInstruction) {
             .type=INSTRUCTION_MOV,
             .inner.mov={
                 .src=transform_operand(ir.inner.ret.val),
@@ -46,19 +46,19 @@ AsmInstructions transform_instruction(IRInstruction ir) {
         };
 
         // ret
-        instructions.instructions[1] = (AsmInstruction) {
+        instructions.inner[1] = (AsmInstruction) {
             .type=INSTRUCTION_RET
         };
         return instructions;
     } else if (ir.type == IR_INSTRUCTION_UNARY) {
         AsmInstructions instructions = {
-            .instructions=malloc(2*sizeof(AsmInstruction)),
+            .inner=malloc(2*sizeof(AsmInstruction)),
             .size=2
         };
-        if (instructions.instructions == NULL) throw_codegen_err("Malloc failed");
+        if (instructions.inner == NULL) throw_codegen_err("Malloc failed");
 
         // mov src to dst
-        instructions.instructions[0] = (AsmInstruction) {
+        instructions.inner[0] = (AsmInstruction) {
             .type=INSTRUCTION_MOV,
             .inner.mov={
                 .src=transform_operand(ir.inner.unary.src),
@@ -67,7 +67,7 @@ AsmInstructions transform_instruction(IRInstruction ir) {
         };
 
         // operate on dst
-        instructions.instructions[1] = (AsmInstruction) {
+        instructions.inner[1] = (AsmInstruction) {
             .type=INSTRUCTION_UNARY,
             .inner.unary= {
                 .op=ir.inner.unary.op,
@@ -82,13 +82,13 @@ AsmInstructions transform_instruction(IRInstruction ir) {
             // dst = left
             // dst += right
             AsmInstructions instructions = {
-                .instructions=malloc(2*sizeof(AsmInstruction)),
+                .inner=malloc(2*sizeof(AsmInstruction)),
                 .size=2
             };
-            if (instructions.instructions == NULL) throw_codegen_err("Malloc failed");
+            if (instructions.inner == NULL) throw_codegen_err("Malloc failed");
     
             // mov src to dst
-            instructions.instructions[0] = (AsmInstruction) {
+            instructions.inner[0] = (AsmInstruction) {
                 .type=INSTRUCTION_MOV,
                 .inner.mov={
                     .src=transform_operand(ir.inner.binary.left),
@@ -97,7 +97,7 @@ AsmInstructions transform_instruction(IRInstruction ir) {
             };
     
             // operate on dst
-            instructions.instructions[1] = (AsmInstruction) {
+            instructions.inner[1] = (AsmInstruction) {
                 .type=INSTRUCTION_BINARY,
                 .inner.binary={
                     .op=ir.inner.binary.op,
@@ -114,13 +114,13 @@ AsmInstructions transform_instruction(IRInstruction ir) {
             // idiv right
             // dst = EAX (or for mod, dst = EDX)
             AsmInstructions instructions = {
-                .instructions=malloc(4*sizeof(AsmInstruction)),
+                .inner=malloc(4*sizeof(AsmInstruction)),
                 .size=2
             };
-            if (instructions.instructions == NULL) throw_codegen_err("Malloc failed");
+            if (instructions.inner == NULL) throw_codegen_err("Malloc failed");
     
             // EAX = left
-            instructions.instructions[0] = (AsmInstruction) {
+            instructions.inner[0] = (AsmInstruction) {
                 .type=INSTRUCTION_MOV,
                 .inner.mov={
                     .src=transform_operand(ir.inner.binary.left),
@@ -132,18 +132,18 @@ AsmInstructions transform_instruction(IRInstruction ir) {
             };
     
             // EDX = sign_extend(EAX)
-            instructions.instructions[1] = (AsmInstruction) {
+            instructions.inner[1] = (AsmInstruction) {
                 .type=INSTRUCTION_CDQ,
             };
 
             // idiv right
-            instructions.instructions[2] = (AsmInstruction) {
+            instructions.inner[2] = (AsmInstruction) {
                 .type=INSTRUCTION_IDIV,
                 .inner.idiv=transform_operand(ir.inner.binary.right)
             };
 
             // dst = EAX (for div) | EDX (for mod)
-            instructions.instructions[3] = (AsmInstruction) {
+            instructions.inner[3] = (AsmInstruction) {
                 .type=INSTRUCTION_MOV,
                 .inner.mov={
                     .src={
@@ -165,21 +165,21 @@ AsmInstructions transform_instruction(IRInstruction ir) {
 AsmFunctionDefinition transform_func(IRFunctionDefinition ir) {
     // TODO: allow multiple statements
     AsmInstructions instructions = {
-        .instructions=NULL,
+        .inner=NULL,
         .size=0
     };
     
     for (size_t i = 0; i < ir.body.size; ++i) {
         AsmInstructions add = transform_instruction(ir.body.inner[i]);
         instructions.size += add.size;
-        instructions.instructions = realloc(instructions.instructions, instructions.size * sizeof(AsmInstruction));
-        if (instructions.instructions == NULL) throw_codegen_err("realloc failed");
+        instructions.inner = realloc(instructions.inner, instructions.size * sizeof(AsmInstruction));
+        if (instructions.inner == NULL) throw_codegen_err("realloc failed");
 
         for (size_t j = 0; j < add.size; j++) {
-            // instructions.instructions[instructions.size-add.size-1] = add.instructions[j];
-            memcpy(&instructions.instructions[instructions.size - add.size + j], &add.instructions[j], sizeof(AsmInstruction));
+            // instructions.inner[instructions.size-add.size-1] = add.inner[j];
+            memcpy(&instructions.inner[instructions.size - add.size + j], &add.inner[j], sizeof(AsmInstruction));
         }
-        free(add.instructions);
+        free(add.inner);
     }
 
     AsmFunctionDefinition func = {

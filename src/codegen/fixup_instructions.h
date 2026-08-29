@@ -8,6 +8,7 @@
 #include "./asm.h"
 
 
-void replace_memory_to_memory_instructions(AsmProgram* this);
+// void replace_memory_to_memory_instructions(AsmProgram* this);
+void fixup_program(AsmProgram* program);
 
 #endif

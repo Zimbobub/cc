@@ -64,7 +64,7 @@ typedef struct {
 
 
 typedef struct {
-    AsmInstruction* instructions;
+    AsmInstruction* inner;
     size_t size;
 } AsmInstructions;
 

@@ -53,7 +53,7 @@ void print_asm_instruction(AsmInstruction* instr, int depth) {
 void print_asm_function_definition(AsmFunctionDefinition* func, int depth) {
     printf("%*cFunctionDefinition (%s) stack: %ld {\n", depth, ' ', func->name, func->stack_size);
     for (size_t i = 0; i < func->instructions.size; ++i) {
-        print_asm_instruction(&func->instructions.instructions[i], depth+2);
+        print_asm_instruction(&func->instructions.inner[i], depth+2);
     }
     printf("%*c}\n", depth, ' ');
 }
