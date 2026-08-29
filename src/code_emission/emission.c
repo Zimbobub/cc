@@ -11,101 +11,79 @@ void throw_code_emission_err(const char* msg) {
 // i64 max is 19 digits, +1 for negatives
 size_t int_digits(int val) {
     char buf[64];
-    return snprintf(buf, 31, "%d", val);
+    return snprintf(buf, 64, "%d", val);
 }
 
 
-char* emit_asm_operand(AsmOperand* op) {
+void emit_asm_operand(String* output, AsmOperand* op) {
     if (op->type == OPERAND_IMMEDIATE) {
         size_t digits = int_digits(op->inner.immediate);
 
-        char* str = malloc(digits + 2); // +1 for the '$', +1 for \0
-        if (str == NULL) throw_code_emission_err("malloc failed");
-        
-        snprintf(str, digits+2, "$%d", op->inner.immediate);
-        return str;
+        String_push_format(output, digits+1, "$%d", op->inner.immediate);
     } else if (op->type == OPERAND_REGISTER) {
-        if (op->inner.reg == REGISTER_RAX) return "\%eax";
-        else if (op->inner.reg == REGISTER_R10) return "\%r10d";
+        if (op->inner.reg == REGISTER_RAX) String_push(output, "\%eax");
+        else if (op->inner.reg == REGISTER_RDX) String_push(output, "\%edx");
+        else if (op->inner.reg == REGISTER_R10) String_push(output, "\%r10d");
+        else if (op->inner.reg == REGISTER_R11) String_push(output, "\%r11d");
         else throw_code_emission_err("unknown register");
     } else if (op->type == OPERAND_STACK_OFFSET) {
         size_t len = int_digits(op->inner.stack_offset) + strlen("-(%rbp)") + 1;
-        char* str = malloc(len);
-        if (str == NULL) throw_code_emission_err("malloc failed");
-        
-        snprintf(str, len, "-%ld(%%rbp)", op->inner.stack_offset);
-        return str;
+
+        String_push_format(output, len, "-%ld(%%rbp)", op->inner.stack_offset);
     } else {
         throw_code_emission_err("unknown operand type");
     }
 }
 
 
-char* emit_asm_instruction(AsmInstruction* instr) {
+void emit_asm_instruction(String* output, AsmInstruction* instr) {
     if (instr->type == INSTRUCTION_MOV) {
-        const char template[] = "    movl , \n";
-        char* src_str = emit_asm_operand(&instr->inner.mov.src);
-        char* dst_str = emit_asm_operand(&instr->inner.mov.dst);
-
-        size_t instruction_len = strlen(template) + strlen(src_str) + strlen(dst_str) + 1;
-        char* str = malloc(instruction_len);
-        if (str == NULL) throw_code_emission_err("malloc failed");
-
-        snprintf(str, instruction_len, "    movl %s, %s\n", src_str, dst_str);
-        return str;
+        String_push(output, "    movl ");
+        emit_asm_operand(output, &instr->inner.mov.src);
+        String_push(output, ", ");
+        emit_asm_operand(output, &instr->inner.mov.dst);
+        String_push(output, "\n");
     } else if (instr->type == INSTRUCTION_UNARY) {
-        char* template;
-        if (instr->inner.unary.op == OPERATOR_NEGATE) template = "    negl %s\n";
-        else if (instr->inner.unary.op == OPERATOR_BITWISE_COMPLEMENT) template = "    notl %s\n";
+        if (instr->inner.unary.op == OPERATOR_NEGATE) String_push(output, "    negl ");
+        else if (instr->inner.unary.op == OPERATOR_BITWISE_COMPLEMENT) String_push(output, "    notl ");
         else throw_code_emission_err("unknown unary operator type");
 
-        char* operand_str = emit_asm_operand(&instr->inner.unary.operand);
-
-        size_t len = strlen(template) + strlen(operand_str) + 1;
-        char* str = malloc(len);
-        if (str == NULL) throw_code_emission_err("malloc failed");
-
-        snprintf(str, len, template, operand_str);
-        return str;
+        emit_asm_operand(output, &instr->inner.unary.operand);
+        String_push(output, "\n");
     } else if (instr->type == INSTRUCTION_RET) {
-        return "    movq %rbp, %rsp\n    popq %rbp\n    ret\n";        
+        String_push(output, "    movq %rbp, %rsp\n    popq %rbp\n    ret\n");
     } else {
         throw_code_emission_err("unknown instruction type");
     }
 }
 
 
-char* emit_asm_function_definition(AsmFunctionDefinition* func) {
-    const char header_template[] = ".globl \n:\n";
-    const char prologue_template[] = "    pushq %rbp\n    movq %rsp, %rbp\n    subq $, %rsp\n";
+void emit_asm_function_definition(String* output, AsmFunctionDefinition* func) {
+    // function header
+    String_push(output, ".globl ");
+    String_push(output, func->name);
+    String_push(output, "\n");
+    String_push(output, func->name);
+    String_push(output, ":\n");
 
-    size_t len = strlen(header_template) + 2*strlen(func->name) + strlen(prologue_template) + int_digits(func->stack_size) + 1;
-    
-    char* str = malloc(len);
-    if (str == NULL) throw_code_emission_err("malloc failed");
+    // function prologue
+    String_push(output, "    pushq %rbp\n");
+    String_push(output, "    movq %rsp, %rbp\n");
+    size_t template_len = sizeof("    subq $, %%rsp\n\n");
+    String_push_format(output, template_len + int_digits(func->stack_size), "    subq $%ld, %%rsp\n\n", func->stack_size);
 
-    snprintf(str, len, ".globl %s\n%s:\n    pushq %%rbp\n    movq %%rsp, %%rbp\n    subq $%ld, %%rsp\n", func->name, func->name, func->stack_size);
-
+    // instructions
     for (size_t i = 0; i < func->instructions.size; ++i) {
-        char* instr = emit_asm_instruction(&func->instructions.inner[i]);
-
-        str = realloc(str, strlen(str) + strlen(instr) + 1);
-        if (str == NULL) throw_code_emission_err("realloc failed");
-
-        strcat(str, instr);
+        emit_asm_instruction(output, &func->instructions.inner[i]);
     }
-
-    return str;
 }
 
 
 char* emit_asm_program(AsmProgram* program) {
-    char exec_stack[] = ".section .note.GNU-stack,\"\",@progbits\n";
-    char* str = emit_asm_function_definition(&program->function_definition);
+    String output = String_new(4096);
 
-    str = realloc(str, (strlen(str) + strlen(exec_stack) + 1));
-    if (str == NULL) throw_code_emission_err("realloc failed");
-    
-    strcat(str, exec_stack);
-    return str;
+    String_push(&output, ".section .note.GNU-stack,\"\",@progbits\n");
+    emit_asm_function_definition(&output, &program->function_definition);
+
+    return output.ptr;
 }
