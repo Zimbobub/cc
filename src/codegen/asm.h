@@ -94,6 +94,6 @@ AsmOperand AsmOperand_pseudo(const char* name);
 AsmOperand AsmOperand_stack(size_t offset);
 
 void AsmInstructions_push(AsmInstructions* instructions, AsmInstruction instr);
-void AsmInstructions_append(AsmInstructions* instructions, AsmInstructions other);
+AsmInstructions* AsmInstructions_append(AsmInstructions* instructions, AsmInstructions* other);
 
 #endif

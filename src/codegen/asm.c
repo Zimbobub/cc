@@ -104,13 +104,15 @@ void AsmInstructions_push(AsmInstructions* instructions, AsmInstruction instr) {
     memcpy(&instructions->inner[instructions->size-1], &instr, sizeof(AsmInstruction));
 }
 
-void AsmInstructions_append(AsmInstructions* instructions, AsmInstructions other) {
+AsmInstructions* AsmInstructions_append(AsmInstructions* instructions, AsmInstructions* other) {
     size_t old_size = instructions->size;
-    instructions->size += other.size;
+    instructions->size += other->size;
     instructions->inner = realloc(instructions->inner, instructions->size * sizeof(AsmInstruction));
     if (instructions->inner == NULL) throw_asm_fixup_err("realloc failed");
 
-    for (size_t i = 0; i < other.size; i++) {
-        memcpy(&instructions->inner[old_size + i], &other.inner[i], sizeof(AsmInstruction));
+    for (size_t i = 0; i < other->size; i++) {
+        memcpy(&instructions->inner[old_size + i], &other->inner[i], sizeof(AsmInstruction));
     }
+
+    return instructions;
 }

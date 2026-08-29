@@ -87,7 +87,7 @@ char* emit_asm_function_definition(AsmFunctionDefinition* func) {
     snprintf(str, len, ".globl %s\n%s:\n    pushq %%rbp\n    movq %%rsp, %%rbp\n    subq $%ld, %%rsp\n", func->name, func->name, func->stack_size);
 
     for (size_t i = 0; i < func->instructions.size; ++i) {
-        char* instr = emit_asm_instruction(&func->instructions.instructions[i]);
+        char* instr = emit_asm_instruction(&func->instructions.inner[i]);
 
         str = realloc(str, strlen(str) + strlen(instr) + 1);
         if (str == NULL) throw_code_emission_err("realloc failed");

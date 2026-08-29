@@ -49,16 +49,16 @@ void replace_pseudo_registers_func(AsmFunctionDefinition* this) {
     size_t num_identifiers = 0;
 
     for (size_t i = 0; i < this->instructions.size; i++) {
-        if (this->instructions.instructions[i].type == INSTRUCTION_MOV) {
-            this->stack_size += replace_pseudo_register_operand(&this->instructions.instructions[i].inner.mov.src, &identifiers, &num_identifiers);
-            this->stack_size += replace_pseudo_register_operand(&this->instructions.instructions[i].inner.mov.dst, &identifiers, &num_identifiers);
-        } else if (this->instructions.instructions[i].type == INSTRUCTION_UNARY) {
-            this->stack_size += replace_pseudo_register_operand(&this->instructions.instructions[i].inner.unary.operand, &identifiers, &num_identifiers);
-        } else if (this->instructions.instructions[i].type == INSTRUCTION_BINARY) {
-            this->stack_size += replace_pseudo_register_operand(&this->instructions.instructions[i].inner.binary.src, &identifiers, &num_identifiers);
-            this->stack_size += replace_pseudo_register_operand(&this->instructions.instructions[i].inner.binary.dst, &identifiers, &num_identifiers);
-        } else if (this->instructions.instructions[i].type == INSTRUCTION_IDIV) {
-            this->stack_size += replace_pseudo_register_operand(&this->instructions.instructions[i].inner.idiv, &identifiers, &num_identifiers);
+        if (this->instructions.inner[i].type == INSTRUCTION_MOV) {
+            this->stack_size += replace_pseudo_register_operand(&this->instructions.inner[i].inner.mov.src, &identifiers, &num_identifiers);
+            this->stack_size += replace_pseudo_register_operand(&this->instructions.inner[i].inner.mov.dst, &identifiers, &num_identifiers);
+        } else if (this->instructions.inner[i].type == INSTRUCTION_UNARY) {
+            this->stack_size += replace_pseudo_register_operand(&this->instructions.inner[i].inner.unary.operand, &identifiers, &num_identifiers);
+        } else if (this->instructions.inner[i].type == INSTRUCTION_BINARY) {
+            this->stack_size += replace_pseudo_register_operand(&this->instructions.inner[i].inner.binary.src, &identifiers, &num_identifiers);
+            this->stack_size += replace_pseudo_register_operand(&this->instructions.inner[i].inner.binary.dst, &identifiers, &num_identifiers);
+        } else if (this->instructions.inner[i].type == INSTRUCTION_IDIV) {
+            this->stack_size += replace_pseudo_register_operand(&this->instructions.inner[i].inner.idiv, &identifiers, &num_identifiers);
         }
     }
 }
