@@ -177,18 +177,15 @@ TokenBuf lexer_destruct(Lexer *this) {
     fclose(this->fp);
     free(this->input_buf);
 
-    // for (int i = 0; i < this->n_tokens; i++) {
-    //     free(this->tokens[i].src);
-    // }
-    // free(this->tokens);
-
     free(this);
 
     return tokens;
 }
 
 
-void lexer_run(Lexer *this) {
+TokenBuf lexer_run(const char* preprocessed_file_name) {
+    Lexer* this = lexer_init(preprocessed_file_name);
+
     int c = 0;
     bool c_was_EOF = false;
     while (!c_was_EOF) {
@@ -250,4 +247,6 @@ void lexer_run(Lexer *this) {
     }
 
     printf("Finished preprocessing with remaining '%s'\n", this->input_buf);
+
+    return lexer_destruct(this);
 }

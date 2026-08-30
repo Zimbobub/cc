@@ -34,11 +34,11 @@ typedef struct {
     // size_t err_len;
 } Lexer;
 
-Lexer* lexer_init(const char* file_name);
+// Lexer* lexer_init(const char* file_name);
 // free everything except the tokens
-TokenBuf lexer_destruct(Lexer *this);
+// TokenBuf lexer_destruct(Lexer *this);
 // return true if err
-void lexer_run(Lexer *this);
+TokenBuf lexer_run(const char* preprocessed_file_name);
 
 // requires Lexer type to exist
 #include "../compile_error/compile_error.h"

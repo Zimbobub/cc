@@ -25,6 +25,27 @@ void print_usage() {
     printf("Usage: cc [stage] <filename.c> \nStage: '--lex' | '--parse' | '--codegen'\nIf stage not given, defaults to code emission\n");
 }
 
+// pass in '\0' for no extension
+char* with_extension(const char* filename, char extension) {
+    size_t len = strlen(filename);
+    char* new_str = malloc(len+1);
+    if (new_str == NULL) {
+        fprintf(stderr, "malloc failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    strcpy(new_str, filename);
+    if (extension == '\0') {
+        new_str[len-1] = '\0';
+        new_str[len-2] = '\0';
+    } else {
+        new_str[len-1] = extension;
+    }
+
+    return new_str;
+}
+
+
 
 void cleanup_files(const char* preprocessed_file, const char* assembly_file) {
     char *cmd_buf = malloc(6 + strlen(preprocessed_file) + strlen(assembly_file));
@@ -91,26 +112,19 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    size_t filename_len = strlen(input_file);
-    char *preprocessed_file = malloc(filename_len+1);
-    char *assembly_file = malloc(filename_len+1);
-    char *exec_file = malloc(filename_len-1); // no file extension
 
-    strcpy(preprocessed_file, input_file);
-    strcpy(assembly_file, input_file);
-    strncpy(exec_file, input_file, filename_len-2);
 
-    // change file extensions
-    preprocessed_file[strlen(preprocessed_file)-1] = 'i';
-    assembly_file[strlen(assembly_file)-1] = 's';
+    char *preprocessed_file = with_extension(input_file, 'i');
+    char *assembly_file = with_extension(input_file, 's');
+    char *exec_file = with_extension(input_file, '\0'); // no file extension
+
 
     // preprocess
     run_preprocessor(input_file, preprocessed_file);
 
     // lexer
-    Lexer *lexer = lexer_init(preprocessed_file);
-    lexer_run(lexer);
-    TokenBuf tokens = lexer_destruct(lexer);
+    TokenBuf tokens = lexer_run(preprocessed_file);
+    free(preprocessed_file);
     print_tokens(&tokens);
     if (stage == STAGE_LEXER) return EXIT_SUCCESS;
 
@@ -119,9 +133,12 @@ int main(int argc, char* argv[]) {
     print_c_program(&ast);
     if (stage == STAGE_PARSER) return EXIT_SUCCESS;
 
+    // ir
     IRProgram ir = IR_transform_ast(ast);
     print_IR_program(&ir);
     if (stage == STAGE_IR) return EXIT_SUCCESS;
+
+
 
     // asm gen
     AsmProgram asm_ast = transform_program(ir);
