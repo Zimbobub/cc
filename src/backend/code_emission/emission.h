@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "../util.h"
+#include "../../util.h"
 #include "../codegen/asm.h"
 
 

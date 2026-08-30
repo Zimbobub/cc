@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "asm.h"
-#include "../IR/IR.h"
+#include "../../IR/IR.h"
 
 AsmProgram transform_program(IRProgram ir);
 

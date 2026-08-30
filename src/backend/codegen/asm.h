@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../parser/ast.h"
+#include "../../frontend/parser/ast.h"
 
 // OPERAND
 typedef enum {

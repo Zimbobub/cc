@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "../parser/ast.h"
+#include "../frontend/parser/ast.h"
 
 // VAL
 typedef enum {

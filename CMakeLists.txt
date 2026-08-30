@@ -15,17 +15,17 @@ include_directories(
 set(SOURCES
     src/main.c
     src/util.c
-    src/compile_error/compile_error.c
-    src/lexer/lexer.c
-    src/lexer/token.c
-    src/parser/parser.c
-    src/parser/ast.c
+    src/frontend/compile_error/compile_error.c
+    src/frontend/lexer/lexer.c
+    src/frontend/lexer/token.c
+    src/frontend/parser/parser.c
+    src/frontend/parser/ast.c
     src/IR/IR.c
-    src/codegen/codegen.c
-    src/codegen/asm.c
-    src/codegen/replace_pseudo_regs.c
-    src/codegen/fixup_instructions.c
-    src/code_emission/emission.c
+    src/backend/codegen/codegen.c
+    src/backend/codegen/asm.c
+    src/backend/codegen/replace_pseudo_regs.c
+    src/backend/codegen/fixup_instructions.c
+    src/backend/code_emission/emission.c
 )
 
 add_executable(mycc ${SOURCES})

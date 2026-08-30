@@ -3,14 +3,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "lexer/lexer.h"
-#include "lexer/token.h"
-#include "parser/parser.h"
+#include "frontend/lexer/lexer.h"
+#include "frontend/lexer/token.h"
+#include "frontend/parser/parser.h"
 #include "IR/IR.h"
-#include "codegen/codegen.h"
-#include "codegen/replace_pseudo_regs.h"
-#include "codegen/fixup_instructions.h"
-#include "code_emission/emission.h"
+#include "backend/codegen/codegen.h"
+#include "backend/codegen/replace_pseudo_regs.h"
+#include "backend/codegen/fixup_instructions.h"
+#include "backend/code_emission/emission.h"
 
 typedef enum {
     STAGE_LEXER,
