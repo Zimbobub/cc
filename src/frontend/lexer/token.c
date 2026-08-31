@@ -34,7 +34,10 @@ const char* get_token_name(TokenType type) {
 }
 
 void print_token(Token *token) {
-    printf("%3ld:%-3ld type: %2d %10s '%s'\n", token->line_num, token->col_num, token->type, get_token_name(token->type), token->src);
+    size_t width = strlen(token->file_name) + 8;
+    size_t location_width = snprintf(NULL, 0, "%s:%ld:%ld", token->file_name, token->line_num, token->col_num);
+    int padding = width > location_width ? width - location_width : 0;
+    printf("%s:%ld:%ld %*c type: %2d %10s '%s'\n", token->file_name, token->line_num, token->col_num, padding, ' ', token->type, get_token_name(token->type), token->src);
 }
 
 void print_tokens(TokenBuf *tokens) {

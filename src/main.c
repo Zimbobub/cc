@@ -6,6 +6,7 @@
 #include "frontend/lexer/lexer.h"
 #include "frontend/lexer/token.h"
 #include "frontend/parser/parser.h"
+#include "frontend/to_IR/to_IR.h"
 #include "IR/IR.h"
 #include "backend/codegen/codegen.h"
 #include "backend/codegen/replace_pseudo_regs.h"
@@ -124,7 +125,6 @@ int main(int argc, char* argv[]) {
 
     // lexer
     TokenBuf tokens = lexer_run(preprocessed_file);
-    free(preprocessed_file);
     print_tokens(&tokens);
     if (stage == STAGE_LEXER) return EXIT_SUCCESS;
 

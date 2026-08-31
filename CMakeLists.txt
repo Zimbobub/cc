@@ -20,6 +20,7 @@ set(SOURCES
     src/frontend/lexer/token.c
     src/frontend/parser/parser.c
     src/frontend/parser/ast.c
+    src/frontend/to_IR/to_IR.c
     src/IR/IR.c
     src/backend/codegen/codegen.c
     src/backend/codegen/asm.c

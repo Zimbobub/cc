@@ -67,6 +67,5 @@ typedef struct {
 } IRProgram;
 
 void print_IR_program(IRProgram* program);
-IRProgram IR_transform_ast(CProgram ast);
 
 #endif
