@@ -16,7 +16,7 @@ void print_IR_instruction(IRInstruction* instr, int depth) {
     } else if (instr->type == IR_INSTRUCTION_UNARY) {
         printf("%*c", depth, ' ');
         print_IR_value(&instr->inner.unary.dst);
-        printf(" = %c", instr->inner.unary.op); // op reprs char
+        printf(" = %s", operator_to_string(instr->inner.unary.op));
         print_IR_value(&instr->inner.unary.src);
         printf("\n");
     } else if (instr->type == IR_INSTRUCTION_BINARY) {
@@ -24,7 +24,7 @@ void print_IR_instruction(IRInstruction* instr, int depth) {
         print_IR_value(&instr->inner.binary.dst);
         printf(" = ");
         print_IR_value(&instr->inner.binary.left);
-        printf(" %c ", instr->inner.binary.op); // op reprs char
+        printf(" %s ", operator_to_string(instr->inner.binary.op));
         print_IR_value(&instr->inner.binary.right);
         printf("\n");
     }

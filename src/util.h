@@ -10,26 +10,42 @@
 #include "frontend/lexer/token.h"
 
 // OPERATORS
-// repr char for easy printing
 typedef enum {
-    OPERATOR_ADD = '+',
-    OPERATOR_SUB = '-',
-    OPERATOR_MUL = '*',
-    OPERATOR_DIV = '/',
-    OPERATOR_MOD = '%',
-} BinaryOperator;
-
-typedef enum {
-    OPERATOR_BITWISE_COMPLEMENT = '~',
-    OPERATOR_NEGATE = '-'
+    OPERATOR_BITWISE_COMPLEMENT = -2,
+    OPERATOR_NEGATE = -1
 } UnaryOperator;
 
 typedef enum {
-    PRECEDENCE_UNKNOWN = 0,
-    PRECEDENCE_ADD = 1,
-    PRECEDENCE_MUL = 2
+    OPERATOR_UNKNOWN,
+    OPERATOR_ADD,
+    OPERATOR_SUB,
+    OPERATOR_MUL,
+    OPERATOR_DIV,
+    OPERATOR_MOD,
+
+    OPERATOR_BITWISE_AND,
+    OPERATOR_BITWISE_OR,
+    OPERATOR_BITWISE_XOR,
+    OPERATOR_LEFT_SHIFT,
+    OPERATOR_RIGHT_SHIFT
+} BinaryOperator;
+
+// https://en.cppreference.com/c/language/operator_precedence (table is upside down compared to this enum)
+typedef enum {
+    PRECEDENCE_UNKNOWN,
+    PRECEDENCE_BITWISE_OR,
+    PRECEDENCE_BITWISE_XOR,
+    PRECEDENCE_BITWISE_AND,
+    PRECEDENCE_SHIFT,
+    PRECEDENCE_ADD,
+    PRECEDENCE_MUL,
+    PRECEDENCE_UNARY // unused
 } Precedence;
 
+UnaryOperator unary_operator_from_token(TokenType token);
+BinaryOperator binary_operator_from_token(TokenType token);
+const char* operator_to_string(int operator);
+Precedence precedence(int operator);
 Precedence precedence_from_token(TokenType token);
 
 

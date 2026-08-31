@@ -28,13 +28,13 @@ void print_asm_instruction(AsmInstruction* instr, int depth) {
         printf(")\n");
 
     } else if (instr->type == INSTRUCTION_UNARY) {
-        printf("%*c%c", depth, ' ', instr->inner.unary.op);
+        printf("%*c%s", depth, ' ', operator_to_string(instr->inner.unary.op));
         print_asm_operand(&instr->inner.unary.operand);
         printf("\n");
     } else if (instr->type == INSTRUCTION_BINARY) {
         printf("%*c", depth, ' ');
         print_asm_operand(&instr->inner.binary.dst);
-        printf("%c=", instr->inner.binary.op);
+        printf("%s=", operator_to_string(instr->inner.binary.op));
         print_asm_operand(&instr->inner.binary.src);
         printf("\n");
     } else if (instr->type == INSTRUCTION_IDIV) {

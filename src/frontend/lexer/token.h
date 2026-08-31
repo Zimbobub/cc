@@ -33,9 +33,15 @@ typedef enum {
     ForwardSlash,
     Percent,
 
+    Ampersand,
+    Pipe,
+    Caret,
+
     // 2 char
     Increment,
-    Decrement
+    Decrement,
+    LeftShift,
+    RightShift
 } TokenType;
 
 typedef struct {

@@ -1,5 +1,53 @@
 #include "util.h"
 
+
+
+const char* operator_to_string(int operator) {
+    switch (operator) {
+        // unary
+        case OPERATOR_BITWISE_COMPLEMENT: return "-";
+        case OPERATOR_NEGATE: return "-";
+
+        // binary
+        case OPERATOR_ADD: return "+";
+        case OPERATOR_SUB: return "-";
+        case OPERATOR_MUL: return "*";
+        case OPERATOR_DIV: return "/";
+        case OPERATOR_MOD: return "%";
+    
+        case OPERATOR_BITWISE_AND: return "&";
+        case OPERATOR_BITWISE_OR: return "|";
+        case OPERATOR_BITWISE_XOR: return "^";
+        case OPERATOR_LEFT_SHIFT: return "<<";
+        case OPERATOR_RIGHT_SHIFT: return ">>";    
+
+        default: return "unknown";
+    }
+}
+
+Precedence precedence(int operator) {
+    switch (operator) {
+        // unary
+        case OPERATOR_BITWISE_COMPLEMENT: return PRECEDENCE_UNARY;
+        case OPERATOR_NEGATE: return PRECEDENCE_UNARY;
+
+        // binary
+        case OPERATOR_ADD: return PRECEDENCE_ADD;
+        case OPERATOR_SUB: return PRECEDENCE_ADD;
+        case OPERATOR_MUL: return PRECEDENCE_MUL;
+        case OPERATOR_DIV: return PRECEDENCE_MUL;
+        case OPERATOR_MOD: return PRECEDENCE_MUL;
+    
+        case OPERATOR_BITWISE_AND: return PRECEDENCE_BITWISE_AND;
+        case OPERATOR_BITWISE_OR: return PRECEDENCE_BITWISE_OR;
+        case OPERATOR_BITWISE_XOR: return PRECEDENCE_BITWISE_XOR;
+        case OPERATOR_LEFT_SHIFT: return PRECEDENCE_SHIFT;
+        case OPERATOR_RIGHT_SHIFT: return PRECEDENCE_SHIFT;    
+
+        default: return PRECEDENCE_UNKNOWN;
+    }
+}
+
 Precedence precedence_from_token(TokenType token) {
     switch (token) {
         case Plus:
@@ -16,6 +64,32 @@ Precedence precedence_from_token(TokenType token) {
     }
 }
 
+UnaryOperator unary_operator_from_token(TokenType token) {
+    switch (token) {
+        case Tilde: return OPERATOR_BITWISE_COMPLEMENT;
+        case Minus: return OPERATOR_NEGATE;
+
+        default: return OPERATOR_UNKNOWN;
+    }
+}
+
+BinaryOperator binary_operator_from_token(TokenType token) {
+    switch (token) {
+        case Plus: return OPERATOR_ADD;
+        case Minus: return OPERATOR_SUB;
+        case Asterisk: return OPERATOR_MUL;
+        case ForwardSlash: return OPERATOR_DIV;
+        case Percent: return OPERATOR_MOD;
+
+        case Ampersand: return OPERATOR_BITWISE_AND;
+        case Pipe: return OPERATOR_BITWISE_OR;
+        case Caret: return OPERATOR_BITWISE_XOR;
+        case LeftShift: return OPERATOR_LEFT_SHIFT;
+        case RightShift: return OPERATOR_RIGHT_SHIFT;
+        
+        default: return OPERATOR_UNKNOWN;
+    }
+}
 
 
 String String_new(size_t cap) {

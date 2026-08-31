@@ -4,11 +4,11 @@ void print_c_expr(CExpression* expr, int depth) {
     if (expr->type == EXPRESSION_CONST) {
         printf("%*c%d\n", depth, ' ', expr->expr.constant.val);
     } else if (expr->type == EXPRESSION_UNARY) {
-        printf("%*c%c\n", depth, ' ', expr->expr.unary.op); // operators repr char
+        printf("%*c%s\n", depth, ' ', operator_to_string(expr->expr.unary.op));
         print_c_expr(expr->expr.unary.val, depth+4);
     } else if (expr->type == EXPRESSION_BINARY) {
         print_c_expr(expr->expr.binary.left, depth+4);
-        printf("%*c%c\n", depth, ' ', expr->expr.binary.op);
+        printf("%*c%s\n", depth, ' ', operator_to_string(expr->expr.binary.op));
         print_c_expr(expr->expr.binary.right, depth+4);
     }
 }

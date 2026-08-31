@@ -26,9 +26,15 @@ const char* get_token_name(TokenType type) {
         "Asterisk",
         "ForwardSlash",
         "Percent",
+
+        "Ampersand",
+        "Pipe",
+        "Caret",
     
         "Increment",
-        "Decrement"
+        "Decrement",
+        "LeftShift",
+        "RightShift"
     };
     return token_types[type];
 }
