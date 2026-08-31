@@ -4,22 +4,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
-
-// OPERATORS
-// repr char for easy printing
-typedef enum {
-    OPERATOR_ADD = '+',
-    OPERATOR_SUB = '-',
-    OPERATOR_MUL = '*',
-    OPERATOR_DIV = '/',
-    OPERATOR_MOD = '%',
-} BinaryOperator;
-
-typedef enum {
-    OPERATOR_BITWISE_COMPLEMENT = '~',
-    OPERATOR_NEGATE = '-'
-} UnaryOperator;
-
+#include "../../util.h"
 
 
 // EXPRESSIONS
