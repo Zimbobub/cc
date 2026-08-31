@@ -49,22 +49,6 @@ BinaryOperator expect_binary_operator(TokenBuf tokens, size_t* i) {
 }
 
 
-Precedence precedence(TokenType token) {
-    switch (token) {
-        case Plus:
-        case Minus:
-            return PRECEDENCE_ADD;
-
-        case Asterisk:
-        case ForwardSlash:
-        case Percent:
-            return PRECEDENCE_MUL;
-        
-        default:
-            return PRECEDENCE_UNKNOWN;
-    }
-}
-
 
 CExpression parse_factor(TokenBuf tokens, size_t* i); // decl for circular recursive calls
 
@@ -77,8 +61,8 @@ CExpression parse_expression(TokenBuf tokens, size_t* i, Precedence min_preceden
     CExpression expr = parse_factor(tokens, i);
 
     // non-operator tokens have a precedence of 0, so the loop will end at end of expr
-    while (precedence(tokens.tokens[*i].type) >= min_precedence) {
-        Precedence prec = precedence(tokens.tokens[*i].type);
+    while (precedence_from_token(tokens.tokens[*i].type) >= min_precedence) {
+        Precedence prec = precedence_from_token(tokens.tokens[*i].type);
 
         BinaryOperator op = expect_binary_operator(tokens, i);
 

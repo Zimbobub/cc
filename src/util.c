@@ -1,5 +1,23 @@
 #include "util.h"
 
+Precedence precedence_from_token(TokenType token) {
+    switch (token) {
+        case Plus:
+        case Minus:
+            return PRECEDENCE_ADD;
+
+        case Asterisk:
+        case ForwardSlash:
+        case Percent:
+            return PRECEDENCE_MUL;
+        
+        default:
+            return PRECEDENCE_UNKNOWN;
+    }
+}
+
+
+
 String String_new(size_t cap) {
     if (cap == 0) cap = 4096;
 

@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "frontend/lexer/token.h"
 
 // OPERATORS
 // repr char for easy printing
@@ -22,6 +23,15 @@ typedef enum {
     OPERATOR_BITWISE_COMPLEMENT = '~',
     OPERATOR_NEGATE = '-'
 } UnaryOperator;
+
+typedef enum {
+    PRECEDENCE_UNKNOWN = 0,
+    PRECEDENCE_ADD = 1,
+    PRECEDENCE_MUL = 2
+} Precedence;
+
+Precedence precedence_from_token(TokenType token);
+
 
 
 typedef struct {
