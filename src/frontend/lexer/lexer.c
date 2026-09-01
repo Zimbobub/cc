@@ -1,27 +1,37 @@
 #include "lexer.h"
 
 TokenType get_single_char_token_type(char c) {
-    if (c == ';') return Semicolon;
-    else if (c == '.') return Period;
-    else if (c == ',') return Comma;
-    else if (c == '(') return LParen;
-    else if (c == ')') return RParen;
-    else if (c == '[') return LBracket;
-    else if (c == ']') return RBracket;
-    else if (c == '{') return LBrace;
-    else if (c == '}') return RBrace;
-    else if (c == '~') return Tilde;
-    else if (c == '+') return Plus;
-    else if (c == '-') return Minus;
-    else if (c == '*') return Asterisk;
-    else if (c == '/') return ForwardSlash;
-    else if (c == '%') return Percent;
-    else return Unknown;
+    switch (c) {
+        case  ';': return Semicolon;
+        case  '.': return Period;
+        case  ',': return Comma;
+
+        case  '(': return LParen;
+        case  ')': return RParen;
+        case  '[': return LBracket;
+        case  ']': return RBracket;
+        case  '{': return LBrace;
+        case  '}': return RBrace;
+
+        case  '~': return Tilde;
+        case  '+': return Plus;
+        case  '-': return Minus;
+        case  '*': return Asterisk;
+        case  '/': return ForwardSlash;
+        case  '%': return Percent;
+
+        case  '&': return Ampersand;
+        case  '|': return Pipe;
+        case  '^': return Caret;
+        default: return Unknown;
+    }
 }
 
 TokenType get_double_char_token_type(char c1, char c2) {
     if (c1 == '+' && c2 == '+') return Increment;
     else if (c1 == '-' && c2 == '-') return Decrement;
+    else if (c1 == '<' && c2 == '<') return LeftShift;
+    else if (c1 == '>' && c2 == '>') return RightShift;
     else return Unknown;
 }
 

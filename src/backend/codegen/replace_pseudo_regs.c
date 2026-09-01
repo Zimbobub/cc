@@ -59,6 +59,15 @@ void replace_pseudo_registers_func(AsmFunctionDefinition* this) {
             this->stack_size += replace_pseudo_register_operand(&this->instructions.inner[i].inner.binary.dst, &identifiers, &num_identifiers);
         } else if (this->instructions.inner[i].type == INSTRUCTION_IDIV) {
             this->stack_size += replace_pseudo_register_operand(&this->instructions.inner[i].inner.idiv, &identifiers, &num_identifiers);
+        } else if (this->instructions.inner[i].type == INSTRUCTION_CDQ) {
+            // do nothing
+        } else if (this->instructions.inner[i].type == INSTRUCTION_SHIFT) {
+            this->stack_size += replace_pseudo_register_operand(&this->instructions.inner[i].inner.shift.operand, &identifiers, &num_identifiers);
+            this->stack_size += replace_pseudo_register_operand(&this->instructions.inner[i].inner.shift.shift_amount, &identifiers, &num_identifiers);
+        } else if (this->instructions.inner[i].type == INSTRUCTION_RET) {
+            // do nothing
+        } else {
+            throw_pseudo_replace_err("unknown instruction type");
         }
     }
 }

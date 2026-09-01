@@ -22,6 +22,7 @@ void emit_asm_operand(String* output, AsmOperand* op) {
         String_push_format(output, digits+1, "$%d", op->inner.immediate);
     } else if (op->type == OPERAND_REGISTER) {
         if (op->inner.reg == REGISTER_RAX) String_push(output, "\%eax");
+        else if (op->inner.reg == REGISTER_RCX) String_push(output, "\%ecx");
         else if (op->inner.reg == REGISTER_RDX) String_push(output, "\%edx");
         else if (op->inner.reg == REGISTER_R10) String_push(output, "\%r10d");
         else if (op->inner.reg == REGISTER_R11) String_push(output, "\%r11d");
@@ -54,6 +55,9 @@ void emit_asm_instruction(String* output, AsmInstruction* instr) {
         if (instr->inner.binary.op == OPERATOR_ADD) String_push(output, "    addl ");
         else if (instr->inner.binary.op == OPERATOR_SUB) String_push(output, "    subl ");
         else if (instr->inner.binary.op == OPERATOR_MUL) String_push(output, "    imull ");
+        else if (instr->inner.binary.op == OPERATOR_BITWISE_AND) String_push(output, "    andl ");
+        else if (instr->inner.binary.op == OPERATOR_BITWISE_OR) String_push(output, "    orl ");
+        else if (instr->inner.binary.op == OPERATOR_BITWISE_XOR) String_push(output, "    xorl ");
         else throw_code_emission_err("unknown binary operator type");
 
         emit_asm_operand(output, &instr->inner.binary.src);
@@ -67,6 +71,15 @@ void emit_asm_instruction(String* output, AsmInstruction* instr) {
         String_push(output, "\n");
     } else if (instr->type == INSTRUCTION_CDQ) {
         String_push(output, "    cdq\n");
+    } else if (instr->type == INSTRUCTION_SHIFT) {
+        // USE ARITHMETIC SHIFT FOR SIGNED INTEGERS
+        if (instr->inner.shift.is_right) String_push(output, "\n    sarl ");
+        else String_push(output, "\n    sall ");
+
+        emit_asm_operand(output, &instr->inner.shift.shift_amount);
+        String_push(output, ", ");
+        emit_asm_operand(output, &instr->inner.shift.operand);
+        String_push(output, "\n");
     } else if (instr->type == INSTRUCTION_RET) {
         String_push(output, "\n    movq %rbp, %rsp\n    popq %rbp\n    ret\n");
     } else {

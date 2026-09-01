@@ -28,24 +28,21 @@ void expect_keyword(TokenBuf tokens, size_t* i, const char* keyword) {
 }
 
 UnaryOperator expect_unary_operator(TokenBuf tokens, size_t* i) {
-    if (tokens.tokens[(*i)].type == Tilde) {
-        expect_token(tokens, i, Tilde);
-        return OPERATOR_BITWISE_COMPLEMENT;
-    } else if (tokens.tokens[(*i)].type == Minus) {
-        expect_token(tokens, i, Minus);
-        return OPERATOR_NEGATE;
-    }
+    if (*i >= tokens.n_tokens) parser_error(&tokens, i, "Index out of range");
+    UnaryOperator op = unary_operator_from_token(tokens.tokens[(*i)].type);
+    if (op == OPERATOR_UNKNOWN) parser_error(&tokens, i, "Expected unary operator, got '%s'", tokens.tokens[(*i)-1].src);
+    
+    (*i)++;
+    return op;
 }
 
 BinaryOperator expect_binary_operator(TokenBuf tokens, size_t* i) {
+    if (*i >= tokens.n_tokens) parser_error(&tokens, i, "Index out of range");
+    BinaryOperator op = binary_operator_from_token(tokens.tokens[(*i)].type);
+    if (op == OPERATOR_UNKNOWN) parser_error(&tokens, i, "Expected binary operator, got '%s'", tokens.tokens[(*i)-1].src);
+    
     (*i)++;
-
-    if (tokens.tokens[(*i)-1].type == Plus) return OPERATOR_ADD;
-    else if (tokens.tokens[(*i)-1].type == Minus) return OPERATOR_SUB;
-    else if (tokens.tokens[(*i)-1].type == Asterisk) return OPERATOR_MUL;
-    else if (tokens.tokens[(*i)-1].type == ForwardSlash) return OPERATOR_DIV;
-    else if (tokens.tokens[(*i)-1].type == Percent) return OPERATOR_MOD;
-    else parser_error(&tokens, i, "Expected binary operator, got %s", get_token_name(tokens.tokens[*i].type));
+    return op;
 }
 
 

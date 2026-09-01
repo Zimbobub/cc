@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "../../frontend/parser/ast.h"
@@ -17,6 +18,7 @@ typedef enum {
 
 typedef enum {
     REGISTER_RAX,
+    REGISTER_RCX,
     REGISTER_RDX,
     REGISTER_R10,
     REGISTER_R11,
@@ -41,6 +43,7 @@ typedef enum {
     INSTRUCTION_BINARY, // add / sub / imul
     INSTRUCTION_IDIV,   // idivl x: EAX = (EDX EAX) / x; EDX = (EDX EAX) % x;
     INSTRUCTION_CDQ,    // sign extend EAX into EDX
+    INSTRUCTION_SHIFT,
     INSTRUCTION_RET
 } AsmInstructionType;
 
@@ -61,6 +64,11 @@ typedef struct {
             AsmOperand dst;
         } binary;
         AsmOperand idiv;
+        struct {
+            bool is_right;
+            AsmOperand operand;
+            AsmOperand shift_amount; // can either be an immediate or CL (lowest 8 bits of ECX)
+        } shift;
     } inner;
 } AsmInstruction;
 

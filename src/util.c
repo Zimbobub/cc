@@ -50,6 +50,14 @@ Precedence precedence(int operator) {
 
 Precedence precedence_from_token(TokenType token) {
     switch (token) {
+        case Pipe: return PRECEDENCE_BITWISE_OR;
+        case Caret: return PRECEDENCE_BITWISE_XOR;
+        case Ampersand: return PRECEDENCE_BITWISE_AND;
+
+        case LeftShift:
+        case RightShift:
+            return PRECEDENCE_SHIFT;
+
         case Plus:
         case Minus:
             return PRECEDENCE_ADD;

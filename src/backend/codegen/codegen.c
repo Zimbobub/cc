@@ -50,7 +50,13 @@ AsmInstructions transform_instruction(IRInstruction ir) {
             }
         });
     } else if (ir.type == IR_INSTRUCTION_BINARY) {
-        if (ir.inner.binary.op == OPERATOR_ADD || ir.inner.binary.op == OPERATOR_SUB || ir.inner.binary.op == OPERATOR_MUL) {
+        if (ir.inner.binary.op == OPERATOR_ADD
+         || ir.inner.binary.op == OPERATOR_SUB
+         || ir.inner.binary.op == OPERATOR_MUL
+         || ir.inner.binary.op == OPERATOR_BITWISE_AND
+         || ir.inner.binary.op == OPERATOR_BITWISE_XOR
+         || ir.inner.binary.op == OPERATOR_BITWISE_OR
+        ) {
             // dst = left + right
             // becomes
             // dst = left
@@ -111,6 +117,32 @@ AsmInstructions transform_instruction(IRInstruction ir) {
                 .inner.mov={
                     .src=(ir.inner.binary.op == OPERATOR_DIV ? AsmOperand_reg(REGISTER_RAX) : AsmOperand_reg(REGISTER_RDX)),
                     .dst=transform_operand(ir.inner.binary.dst)
+                }
+            });
+        } else if (ir.inner.binary.op == OPERATOR_LEFT_SHIFT || ir.inner.binary.op == OPERATOR_RIGHT_SHIFT) {
+            // shl and shr operate slightly differently than the other binary operators,
+            // so they are their own category
+            // dst = left << | >> right
+            // becomes
+            // dst = left
+            // dst << | >> right
+
+            // mov src to dst
+            AsmInstructions_push(&instructions, (AsmInstruction) {
+                .type=INSTRUCTION_MOV,
+                .inner.mov={
+                    .src=transform_operand(ir.inner.binary.left),
+                    .dst=transform_operand(ir.inner.binary.dst)
+                }
+            });
+    
+            // operate on dst
+            AsmInstructions_push(&instructions, (AsmInstruction) {
+                .type=INSTRUCTION_SHIFT,
+                .inner.shift={
+                    .is_right=(ir.inner.binary.op == OPERATOR_RIGHT_SHIFT),
+                    .operand=transform_operand(ir.inner.binary.dst),
+                    .shift_amount=transform_operand(ir.inner.binary.right)
                 }
             });
         } else {

@@ -5,6 +5,7 @@ void print_asm_operand(AsmOperand* op) {
         printf("%d", op->inner.immediate);
     } else if (op->type == OPERAND_REGISTER) {
         if (op->inner.reg == REGISTER_RAX) printf("RAX");
+        else if (op->inner.reg == REGISTER_RCX) printf("RCX");
         else if (op->inner.reg == REGISTER_RDX) printf("RDX");
         else if (op->inner.reg == REGISTER_R10) printf("R10");
         else if (op->inner.reg == REGISTER_R11) printf("R11");
@@ -43,6 +44,15 @@ void print_asm_instruction(AsmInstruction* instr, int depth) {
         printf("\n");
     } else if (instr->type == INSTRUCTION_CDQ) {
         printf("%*ccdq\n", depth, ' ');
+    } else if (instr->type == INSTRUCTION_SHIFT) {
+        printf("%*c", depth, ' ');
+        print_asm_operand(&instr->inner.shift.operand);
+
+        if (instr->inner.shift.is_right) printf(" >> ");
+        else printf(" << ");
+
+        print_asm_operand(&instr->inner.shift.shift_amount);
+        printf("\n");
     } else if (instr->type == INSTRUCTION_RET) {
         printf("%*cret\n", depth, ' ');
     } else {

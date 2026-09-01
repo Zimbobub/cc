@@ -34,9 +34,9 @@ void fixup_mov(AsmInstruction instr, AsmInstructions* fixed_instructions) {
 
 
 // fix add or sub memory to memory
-void fixup_add_sub(AsmInstruction instr, AsmInstructions* fixed_instructions) {
-    if (instr.type != INSTRUCTION_BINARY) throw_asm_fixup_err("fixup_add_sub() called on non-binary instruction");
-    if (instr.inner.binary.op != OPERATOR_ADD && instr.inner.binary.op != OPERATOR_SUB) throw_asm_fixup_err("fixup_add_sub() called on binop that isnt add or sub");
+void fixup_binop_default(AsmInstruction instr, AsmInstructions* fixed_instructions) {
+    if (instr.type != INSTRUCTION_BINARY) throw_asm_fixup_err("fixup_binop_default() called on non-binary instruction");
+    // if (instr.inner.binary.op != OPERATOR_ADD && instr.inner.binary.op != OPERATOR_SUB) throw_asm_fixup_err("fixup_binop_default() called on binop that isnt add or sub");
     if (instr.inner.binary.dst.type == OPERAND_IMMEDIATE) throw_asm_fixup_err("operation dst is an immediate");
 
     if (instr.inner.binary.src.type == OPERAND_STACK_OFFSET && instr.inner.binary.dst.type == OPERAND_STACK_OFFSET) {
@@ -95,6 +95,54 @@ void fixup_imul(AsmInstruction instr, AsmInstructions* fixed_instructions) {
     }
 }
 
+
+// shift amount must be an immediate, or in register ECX
+void fixup_shift(AsmInstruction instr, AsmInstructions* fixed_instructions) {
+    if (instr.type != INSTRUCTION_SHIFT) throw_asm_fixup_err("fixup_shift() called on non-shift instruction");
+    if (instr.inner.shift.operand.type == OPERAND_IMMEDIATE) throw_asm_fixup_err("operation dst is an immediate");
+
+    if (
+        instr.inner.shift.shift_amount.type == OPERAND_REGISTER
+     || instr.inner.shift.shift_amount.type == OPERAND_STACK_OFFSET
+    ) {
+        // shift dst, amt
+        // becomes
+        // mov ecx to r10
+        // mov amt to ecx
+        // shift dst ecx
+        // mov r10 to ecx
+
+        // save ecx
+        AsmInstructions_push(fixed_instructions, (AsmInstruction){
+            .type=INSTRUCTION_MOV,
+            .inner.mov.src=AsmOperand_reg(REGISTER_RCX),
+            .inner.mov.dst=AsmOperand_reg(REGISTER_R10)
+        });
+
+        // mov amt to ecx
+        AsmInstructions_push(fixed_instructions, (AsmInstruction){
+            .type=INSTRUCTION_MOV,
+            .inner.mov.src=instr.inner.shift.shift_amount,
+            .inner.mov.dst=AsmOperand_reg(REGISTER_RCX)
+        });
+
+        // shift dst by amt
+        instr.inner.shift.shift_amount = AsmOperand_reg(REGISTER_RCX);
+        AsmInstructions_push(fixed_instructions, instr);
+
+        // restore ecx
+        AsmInstructions_push(fixed_instructions, (AsmInstruction){
+            .type=INSTRUCTION_MOV,
+            .inner.mov.src=AsmOperand_reg(REGISTER_R10),
+            .inner.mov.dst=AsmOperand_reg(REGISTER_RCX)
+        });
+    } else {
+        // no problem detected
+        AsmInstructions_push(fixed_instructions, instr);
+    }
+}
+
+
 // idiv cant be called using an immediate
 void fixup_idiv(AsmInstruction instr, AsmInstructions* fixed_instructions) {
     if (instr.type != INSTRUCTION_IDIV) throw_asm_fixup_err("fixup_idiv() called on non-idiv instruction");
@@ -121,8 +169,10 @@ void fixup_instruction(AsmInstruction instr, AsmInstructions* fixed_instructions
     if (instr.type == INSTRUCTION_MOV) fixup_mov(instr, fixed_instructions);
     else if (instr.type == INSTRUCTION_BINARY) {
         if (instr.inner.binary.op == OPERATOR_MUL) fixup_imul(instr, fixed_instructions);
-        else fixup_add_sub(instr, fixed_instructions);
+        else if (instr.inner.binary.op == OPERATOR_MUL) fixup_shift(instr, fixed_instructions);
+        else fixup_binop_default(instr, fixed_instructions);
     } else if (instr.type == INSTRUCTION_IDIV) fixup_idiv(instr, fixed_instructions);
+    else if (instr.type == INSTRUCTION_SHIFT) fixup_shift(instr, fixed_instructions);
     else {
         AsmInstructions_push(fixed_instructions, instr);
     }
