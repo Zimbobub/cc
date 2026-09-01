@@ -73,8 +73,8 @@ void emit_asm_instruction(String* output, AsmInstruction* instr) {
         String_push(output, "    cdq\n");
     } else if (instr->type == INSTRUCTION_SHIFT) {
         // USE ARITHMETIC SHIFT FOR SIGNED INTEGERS
-        if (instr->inner.shift.is_right) String_push(output, "\n    sarl ");
-        else String_push(output, "\n    sall ");
+        if (instr->inner.shift.is_right) String_push(output, "    sarl ");
+        else String_push(output, "    sall ");
 
         emit_asm_operand(output, &instr->inner.shift.shift_amount);
         String_push(output, ", ");
